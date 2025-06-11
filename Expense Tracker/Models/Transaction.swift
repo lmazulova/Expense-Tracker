@@ -1,7 +1,7 @@
 import Foundation
 
 
-struct Transaction {
+struct Transaction: Hashable {
     let id: Int
     let accountId: Int
     let categoryId: Int
@@ -13,7 +13,7 @@ struct Transaction {
 }
 
 
-//MARK: - Конвертирование Transaction в json object и обратно
+// MARK: - Конвертирование Transaction в json object и обратно
 extension Transaction {
     var jsonObject: Any {
         return [
@@ -62,7 +62,7 @@ extension Transaction {
 }
 
 
-//MARK: Задание со звездочкой * - Конвертирование Transaction в csv и обратно
+// MARK: Задание со звездочкой * - Конвертирование Transaction в csv и обратно
 extension Transaction {
     
     var csvLine: String {

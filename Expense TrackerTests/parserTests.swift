@@ -1,7 +1,7 @@
 import XCTest
 @testable import Expense_Tracker
 
-//MARK: Задание с двумя звездочками **
+// MARK: Задание с двумя звездочками **
 
 final class Expense_TrackerTests: XCTestCase {
     

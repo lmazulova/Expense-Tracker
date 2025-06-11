@@ -9,6 +9,13 @@ struct ContentView: View {
             Text("Hello, world!")
         }
         .padding()
+        // MARK: - Можно раскомментить и посмотреть как работает сохранение и чтение из файла
+//        .onAppear {
+//            let fileCache = TransactionsFileCache()
+//            fileCache.save(to: "/Users/user/Desktop/Expense Tracker/Expense Tracker/TransactionsFileCache/TransactionsFile1.json")
+//            fileCache.load(from: "/Users/user/Desktop/Expense Tracker/Expense Tracker/TransactionsFileCache/TransactionsFile2.json")
+//            print(fileCache.transactions)
+//        }
     }
 }
 
