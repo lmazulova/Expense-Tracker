@@ -11,14 +11,21 @@ struct ContentView: View {
         .padding()
         //===== Чтение/запись в файл =====
         // Можно раскомментить и посмотреть как работает сохранение и чтение из файла JSON
-        
-//        .onAppear {
-//            let fileCache = TransactionsFileCache()
-//            fileCache.save(to: "/Users/user/Desktop/Expense Tracker/Expense Tracker/TransactionsFileCache/TransactionsFile1.json")
-//            fileCache.load(from: "/Users/user/Desktop/Expense Tracker/Expense Tracker/TransactionsFileCache/TransactionsFile2.json")
-//            print(fileCache.transactions)
-//        }
+        .onAppear {
+//            testFileCache()
+        }
     }
+    private func testFileCache() {
+            let fileCache = TransactionsFileCache()
+            
+            let file1 = "/Users/user/Desktop/Expense Tracker/Expense Tracker/TransactionsFileCache/TransactionsFile1.json"
+            let file2 = "/Users/user/Desktop/Expense Tracker/Expense Tracker/TransactionsFileCache/TransactionsFile2.json"
+            
+            fileCache.save(to: file1)
+            fileCache.load(from: file2)
+            
+            print(fileCache.transactions)
+        }
 }
 
 #Preview {

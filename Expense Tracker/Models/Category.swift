@@ -4,7 +4,7 @@ enum Direction {
     case income, outcome
 }
 
-struct Category {
+struct Category: Hashable {
     let id: Int
     let name: String
     let emoji: Character

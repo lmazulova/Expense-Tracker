@@ -4,8 +4,18 @@ final class TransactionsService {
     private var allTransactions: Set<Transaction> = [
         Transaction(
             id: 1,
-            accountId: 100,
-            categoryId: 5,
+            account: BankAccountShort(
+                id: 1,
+                name: "Основной счет",
+                balance: 1000.00,
+                currency: "RUB"
+            ),
+            category: Category(
+                id: 1,
+                name: "Зарплата",
+                emoji: "💰",
+                isIncome: .income
+            ),
             amount: Decimal(string: "1234.56")!,
             transactionDate: ISO8601DateFormatter().date(from: "2025-06-10T12:00:00Z")!,
             comment: "Обед с командой",
@@ -14,8 +24,18 @@ final class TransactionsService {
         ),
         Transaction(
             id: 2,
-            accountId: 100,
-            categoryId: 2,
+            account: BankAccountShort(
+                id: 1,
+                name: "Основной счет",
+                balance: 1000.00,
+                currency: "RUB"
+            ),
+            category: Category(
+                id: 1,
+                name: "Зарплата",
+                emoji: "💰",
+                isIncome: .income
+            ),
             amount: Decimal(string: "4999.00")!,
             transactionDate: ISO8601DateFormatter().date(from: "2025-06-09T09:30:00Z")!,
             comment: "Зарплата за май",
@@ -24,8 +44,18 @@ final class TransactionsService {
         ),
         Transaction(
             id: 3,
-            accountId: 100,
-            categoryId: 3,
+            account: BankAccountShort(
+                id: 1,
+                name: "Основной счет",
+                balance: 1000.00,
+                currency: "RUB"
+            ),
+            category: Category(
+                id: 1,
+                name: "Зарплата",
+                emoji: "💰",
+                isIncome: .income
+            ),
             amount: Decimal(string: "199.99")!,
             transactionDate: ISO8601DateFormatter().date(from: "2025-06-08T18:45:00Z")!,
             comment: "Покупка игры в Steam",
@@ -34,8 +64,18 @@ final class TransactionsService {
         ),
         Transaction(
             id: 4,
-            accountId: 100,
-            categoryId: 4,
+            account: BankAccountShort(
+                id: 1,
+                name: "Основной счет",
+                balance: 1000.00,
+                currency: "RUB"
+            ),
+            category: Category(
+                id: 1,
+                name: "Зарплата",
+                emoji: "💰",
+                isIncome: .income
+            ),
             amount: Decimal(string: "75.50")!,
             transactionDate: ISO8601DateFormatter().date(from: "2025-06-07T08:15:00Z")!,
             comment: "Такси до офиса",
@@ -44,8 +84,18 @@ final class TransactionsService {
         ),
         Transaction(
             id: 5,
-            accountId: 100,
-            categoryId: 6,
+            account: BankAccountShort(
+                id: 1,
+                name: "Основной счет",
+                balance: 1000.00,
+                currency: "RUB"
+            ),
+            category: Category(
+                id: 1,
+                name: "Зарплата",
+                emoji: "💰",
+                isIncome: .income
+            ),
             amount: Decimal(string: "250.00")!,
             transactionDate: ISO8601DateFormatter().date(from: "2025-06-06T22:00:00Z")!,
             comment: nil,

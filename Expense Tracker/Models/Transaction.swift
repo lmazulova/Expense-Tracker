@@ -3,8 +3,8 @@ import Foundation
 
 struct Transaction: Hashable {
     let id: Int
-    let accountId: Int
-    let categoryId: Int
+    let account: BankAccountShort
+    let category: Category
     let amount: Decimal
     let transactionDate: Date
     let comment: String?
@@ -18,8 +18,18 @@ extension Transaction {
     var jsonObject: Any {
         return [
             "id": id,
-            "accountId": accountId,
-            "categoryId": categoryId,
+            "account": [
+                "id": account.id,
+                "name": account.name,
+                "balance": account.balance,
+                "currency": account.currency
+            ],
+            "category": [
+                "id": category.id,
+                "name": category.name,
+                "emoji": String(category.emoji),
+                "isIncome": category.isIncome == .income ? true : false
+            ],
             "amount": NSDecimalNumber(decimal: amount),
             "transactionDate": ISO8601DateFormatter().string(from: transactionDate),
             "comment": comment as Any,
@@ -31,8 +41,17 @@ extension Transaction {
     static func parse(jsonObject: Any) -> Transaction? {
         guard let dict = jsonObject as? [String : Any],
               let id = dict["id"] as? Int,
-              let accountId = dict["accountId"] as? Int,
-              let categoryId = dict["categoryId"] as? Int,
+              let accountDict = dict["account"] as? [String : Any],
+              let accountId = accountDict["id"] as? Int,
+              let accountName = accountDict["name"] as? String,
+              let accountBalanceNumber = accountDict["balance"] as? NSNumber,
+              let accountCurrency = accountDict["currency"] as? String,
+              let categoryDict = dict["category"] as? [String : Any],
+              let categoryId = categoryDict["id"] as? Int,
+              let categoryName = categoryDict["name"] as? String,
+              let categoryEmojiStr = categoryDict["emoji"] as? String,
+              let categoryEmoji = categoryEmojiStr.first,
+              let categoryIsIncome = categoryDict["isIncome"] as? Bool,
               let amountNumber =  dict["amount"] as? NSNumber,
               let transactionDateStr = dict["transactionDate"] as? String,
               let transactionDate = ISO8601DateFormatter().date(from: transactionDateStr),
@@ -47,11 +66,12 @@ extension Transaction {
         
         let comment = dict["comment"] as? String
         let amount = amountNumber.decimalValue
+        let accountBalance = accountBalanceNumber.decimalValue
         
         return Transaction(
             id: id,
-            accountId: accountId,
-            categoryId: categoryId,
+            account: BankAccountShort(id: accountId, name: accountName, balance: accountBalance, currency: accountCurrency),
+            category: Category(id: categoryId, name: categoryName, emoji: categoryEmoji, isIncome: categoryIsIncome ? .income : .outcome),
             amount: amount,
             transactionDate: transactionDate,
             comment: comment,
@@ -64,15 +84,37 @@ extension Transaction {
 
 // MARK: Задание со звездочкой * - Конвертирование Transaction в csv и обратно
 extension Transaction {
+    static let csvHeader = [
+        "id",
+        "account.id",
+        "account.name",
+        "account.balance",
+        "account.currency",
+        "category.id",
+        "category.name",
+        "category.emoji",
+        "category.isIncome",
+        "amount",
+        "transactionDate",
+        "comment",
+        "createdAt",
+        "updatedAt"
+    ]
     
     var csvLine: String {
         let fields: [String] = [
             String(id),
-            String(accountId),
-            String(categoryId),
+            String(account.id),
+            account.name,
+            NSDecimalNumber(decimal: account.balance).stringValue,
+            account.currency,
+            String(category.id),
+            category.name,
+            String(category.emoji),
+            category.isIncome == .income ? "true" : "false",
             NSDecimalNumber(decimal: amount).stringValue,
             ISO8601DateFormatter().string(from: transactionDate),
-            "\"\(comment ?? "")\"",
+            comment ?? "",
             ISO8601DateFormatter().string(from: createdAt),
             ISO8601DateFormatter().string(from: updatedAt)
         ]
@@ -83,25 +125,38 @@ extension Transaction {
     static func parse(csvLine: String) -> Transaction? {
         let components = csvLine.components(separatedBy: ",")
         
-        guard components.count >= 8,
+        guard components.count >= 14,
               let id = Int(components[0]),
               let accountId = Int(components[1]),
-              let categoryId = Int(components[2]),
-              let amount = Decimal(string: components[3]),
-              let transactionDate = ISO8601DateFormatter().date(from: components[4]),
-              let createdAt = ISO8601DateFormatter().date(from: components[6]),
-              let updatedAt = ISO8601DateFormatter().date(from: components[7])
+              let accountBalance = Decimal(string: components[3]),
+              let categoryId = Int(components[5]),
+              let categoryEmoji = components[7].first,
+              let isIncome = Bool(components[8]),
+              let amount = Decimal(string: components[9]),
+              let transactionDate = ISO8601DateFormatter().date(from: components[10]),
+              let createdAt = ISO8601DateFormatter().date(from: components[12]),
+              let updatedAt = ISO8601DateFormatter().date(from: components[13])
         else {
             print("[\(Self.self).parse] — Ошибка десериализации CSV.")
             return nil
         }
         
-        let comment = components[5].isEmpty ? nil : components[5]
+        let comment = components[11].isEmpty ? nil : components[11]
         
         return Transaction(
             id: id,
-            accountId: accountId,
-            categoryId: categoryId,
+            account: BankAccountShort(
+                id: accountId,
+                name: components[2],
+                balance: accountBalance,
+                currency: components[4]
+            ),
+            category: Category(
+                id: categoryId,
+                name: components[6],
+                emoji: categoryEmoji,
+                isIncome: isIncome ? .income : .outcome
+            ),
             amount: amount,
             transactionDate: transactionDate,
             comment: comment,
