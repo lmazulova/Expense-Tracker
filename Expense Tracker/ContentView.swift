@@ -12,7 +12,7 @@ struct ContentView: View {
         //===== Чтение/запись в файл =====
         // Можно раскомментить и посмотреть как работает сохранение и чтение из файла JSON
         .onAppear {
-//            testFileCache()
+            testFileCache()
         }
     }
     private func testFileCache() {

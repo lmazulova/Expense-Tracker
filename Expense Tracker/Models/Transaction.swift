@@ -21,7 +21,7 @@ extension Transaction {
             "account": [
                 "id": account.id,
                 "name": account.name,
-                "balance": account.balance,
+                "balance": NSDecimalNumber(decimal: account.balance).stringValue,
                 "currency": account.currency
             ],
             "category": [
@@ -30,7 +30,7 @@ extension Transaction {
                 "emoji": String(category.emoji),
                 "isIncome": category.isIncome == .income ? true : false
             ],
-            "amount": NSDecimalNumber(decimal: amount),
+            "amount": NSDecimalNumber(decimal: amount).stringValue,
             "transactionDate": ISO8601DateFormatter().string(from: transactionDate),
             "comment": comment as Any,
             "createdAt": ISO8601DateFormatter().string(from: createdAt),
@@ -44,7 +44,8 @@ extension Transaction {
               let accountDict = dict["account"] as? [String : Any],
               let accountId = accountDict["id"] as? Int,
               let accountName = accountDict["name"] as? String,
-              let accountBalanceNumber = accountDict["balance"] as? NSNumber,
+              let accountBalanceStr = accountDict["balance"] as? String,
+              let accountBalance = Decimal(string: accountBalanceStr),
               let accountCurrency = accountDict["currency"] as? String,
               let categoryDict = dict["category"] as? [String : Any],
               let categoryId = categoryDict["id"] as? Int,
@@ -52,7 +53,8 @@ extension Transaction {
               let categoryEmojiStr = categoryDict["emoji"] as? String,
               let categoryEmoji = categoryEmojiStr.first,
               let categoryIsIncome = categoryDict["isIncome"] as? Bool,
-              let amountNumber =  dict["amount"] as? NSNumber,
+              let amountStr =  dict["amount"] as? String,
+              let amount = Decimal(string: amountStr),
               let transactionDateStr = dict["transactionDate"] as? String,
               let transactionDate = ISO8601DateFormatter().date(from: transactionDateStr),
               let createdAtStr = dict["createdAt"] as? String,
@@ -65,8 +67,6 @@ extension Transaction {
         }
         
         let comment = dict["comment"] as? String
-        let amount = amountNumber.decimalValue
-        let accountBalance = accountBalanceNumber.decimalValue
         
         return Transaction(
             id: id,
