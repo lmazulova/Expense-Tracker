@@ -1,0 +1,167 @@
+import Foundation
+
+
+struct Transaction: Hashable {
+    let id: Int
+    let account: BankAccountShort
+    let category: Category
+    let amount: Decimal
+    let transactionDate: Date
+    let comment: String?
+    let createdAt: Date
+    let updatedAt: Date
+}
+
+
+// MARK: - Конвертирование Transaction в json object и обратно
+extension Transaction {
+    var jsonObject: Any {
+        return [
+            "id": id,
+            "account": [
+                "id": account.id,
+                "name": account.name,
+                "balance": NSDecimalNumber(decimal: account.balance).stringValue,
+                "currency": account.currency
+            ],
+            "category": [
+                "id": category.id,
+                "name": category.name,
+                "emoji": String(category.emoji),
+                "isIncome": category.isIncome == .income ? true : false
+            ],
+            "amount": NSDecimalNumber(decimal: amount).stringValue,
+            "transactionDate": ISO8601DateFormatter().string(from: transactionDate),
+            "comment": comment as Any,
+            "createdAt": ISO8601DateFormatter().string(from: createdAt),
+            "updatedAt": ISO8601DateFormatter().string(from: updatedAt)
+        ]
+    }
+    
+    static func parse(jsonObject: Any) -> Transaction? {
+        guard let dict = jsonObject as? [String : Any],
+              let id = dict["id"] as? Int,
+              let accountDict = dict["account"] as? [String : Any],
+              let accountId = accountDict["id"] as? Int,
+              let accountName = accountDict["name"] as? String,
+              let accountBalanceStr = accountDict["balance"] as? String,
+              let accountBalance = Decimal(string: accountBalanceStr),
+              let accountCurrency = accountDict["currency"] as? String,
+              let categoryDict = dict["category"] as? [String : Any],
+              let categoryId = categoryDict["id"] as? Int,
+              let categoryName = categoryDict["name"] as? String,
+              let categoryEmojiStr = categoryDict["emoji"] as? String,
+              let categoryEmoji = categoryEmojiStr.first,
+              let categoryIsIncome = categoryDict["isIncome"] as? Bool,
+              let amountStr =  dict["amount"] as? String,
+              let amount = Decimal(string: amountStr),
+              let transactionDateStr = dict["transactionDate"] as? String,
+              let transactionDate = ISO8601DateFormatter().date(from: transactionDateStr),
+              let createdAtStr = dict["createdAt"] as? String,
+              let createdAt = ISO8601DateFormatter().date(from: createdAtStr),
+              let updatedAtStr = dict["updatedAt"] as? String,
+              let updatedAt = ISO8601DateFormatter().date(from: updatedAtStr)
+        else {
+            print("[\(Self.self).parse] — Ошибка десериализации JSON.")
+            return nil
+        }
+        
+        let comment = dict["comment"] as? String
+        
+        return Transaction(
+            id: id,
+            account: BankAccountShort(id: accountId, name: accountName, balance: accountBalance, currency: accountCurrency),
+            category: Category(id: categoryId, name: categoryName, emoji: categoryEmoji, isIncome: categoryIsIncome ? .income : .outcome),
+            amount: amount,
+            transactionDate: transactionDate,
+            comment: comment,
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        )
+    }
+}
+
+
+// MARK: Задание со звездочкой * - Конвертирование Transaction в csv и обратно
+extension Transaction {
+    static let csvHeader = [
+        "id",
+        "account.id",
+        "account.name",
+        "account.balance",
+        "account.currency",
+        "category.id",
+        "category.name",
+        "category.emoji",
+        "category.isIncome",
+        "amount",
+        "transactionDate",
+        "comment",
+        "createdAt",
+        "updatedAt"
+    ]
+    
+    var csvLine: String {
+        let fields: [String] = [
+            String(id),
+            String(account.id),
+            account.name,
+            NSDecimalNumber(decimal: account.balance).stringValue,
+            account.currency,
+            String(category.id),
+            category.name,
+            String(category.emoji),
+            category.isIncome == .income ? "true" : "false",
+            NSDecimalNumber(decimal: amount).stringValue,
+            ISO8601DateFormatter().string(from: transactionDate),
+            comment ?? "",
+            ISO8601DateFormatter().string(from: createdAt),
+            ISO8601DateFormatter().string(from: updatedAt)
+        ]
+        return fields.joined(separator: ",")
+    }
+    
+//  в случае если csv ответ содержит названия полей, перед вызовом функции их нужно удалить
+    static func parse(csvLine: String) -> Transaction? {
+        let components = csvLine.components(separatedBy: ",")
+        
+        guard components.count >= 14,
+              let id = Int(components[0]),
+              let accountId = Int(components[1]),
+              let accountBalance = Decimal(string: components[3]),
+              let categoryId = Int(components[5]),
+              let categoryEmoji = components[7].first,
+              let isIncome = Bool(components[8]),
+              let amount = Decimal(string: components[9]),
+              let transactionDate = ISO8601DateFormatter().date(from: components[10]),
+              let createdAt = ISO8601DateFormatter().date(from: components[12]),
+              let updatedAt = ISO8601DateFormatter().date(from: components[13])
+        else {
+            print("[\(Self.self).parse] — Ошибка десериализации CSV.")
+            return nil
+        }
+        
+        let comment = components[11].isEmpty ? nil : components[11]
+        
+        return Transaction(
+            id: id,
+            account: BankAccountShort(
+                id: accountId,
+                name: components[2],
+                balance: accountBalance,
+                currency: components[4]
+            ),
+            category: Category(
+                id: categoryId,
+                name: components[6],
+                emoji: categoryEmoji,
+                isIncome: isIncome ? .income : .outcome
+            ),
+            amount: amount,
+            transactionDate: transactionDate,
+            comment: comment,
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        )
+    }
+}

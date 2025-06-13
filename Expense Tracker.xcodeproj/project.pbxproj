@@ -6,8 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		CEB745EC2DF9B03500DADFC6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CEB745B72DF8B03700DADFC6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CEB745BE2DF8B03800DADFC6;
+			remoteInfo = "Expense Tracker";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		CEB745BF2DF8B03800DADFC6 /* Expense Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Expense Tracker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEB745E82DF9B03500DADFC6 /* Expense TrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Expense TrackerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -16,10 +27,22 @@
 			path = "Expense Tracker";
 			sourceTree = "<group>";
 		};
+		CEB745E92DF9B03500DADFC6 /* Expense TrackerTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Expense TrackerTests";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		CEB745BC2DF8B03800DADFC6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEB745E52DF9B03500DADFC6 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				CEB745C12DF8B03800DADFC6 /* Expense Tracker */,
+				CEB745E92DF9B03500DADFC6 /* Expense TrackerTests */,
 				CEB745C02DF8B03800DADFC6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				CEB745BF2DF8B03800DADFC6 /* Expense Tracker.app */,
+				CEB745E82DF9B03500DADFC6 /* Expense TrackerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -70,6 +95,29 @@
 			productReference = CEB745BF2DF8B03800DADFC6 /* Expense Tracker.app */;
 			productType = "com.apple.product-type.application";
 		};
+		CEB745E72DF9B03500DADFC6 /* Expense TrackerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CEB745EE2DF9B03500DADFC6 /* Build configuration list for PBXNativeTarget "Expense TrackerTests" */;
+			buildPhases = (
+				CEB745E42DF9B03500DADFC6 /* Sources */,
+				CEB745E52DF9B03500DADFC6 /* Frameworks */,
+				CEB745E62DF9B03500DADFC6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CEB745ED2DF9B03500DADFC6 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CEB745E92DF9B03500DADFC6 /* Expense TrackerTests */,
+			);
+			name = "Expense TrackerTests";
+			packageProductDependencies = (
+			);
+			productName = "Expense TrackerTests";
+			productReference = CEB745E82DF9B03500DADFC6 /* Expense TrackerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -82,6 +130,10 @@
 				TargetAttributes = {
 					CEB745BE2DF8B03800DADFC6 = {
 						CreatedOnToolsVersion = 16.2;
+					};
+					CEB745E72DF9B03500DADFC6 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = CEB745BE2DF8B03800DADFC6;
 					};
 				};
 			};
@@ -100,12 +152,20 @@
 			projectRoot = "";
 			targets = (
 				CEB745BE2DF8B03800DADFC6 /* Expense Tracker */,
+				CEB745E72DF9B03500DADFC6 /* Expense TrackerTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		CEB745BD2DF8B03800DADFC6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEB745E62DF9B03500DADFC6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +182,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CEB745E42DF9B03500DADFC6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CEB745ED2DF9B03500DADFC6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CEB745BE2DF8B03800DADFC6 /* Expense Tracker */;
+			targetProxy = CEB745EC2DF9B03500DADFC6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		CEB745CB2DF8B03900DADFC6 /* Debug */ = {
@@ -302,6 +377,42 @@
 			};
 			name = Release;
 		};
+		CEB745EF2DF9B03500DADFC6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3669X7VCBS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "ru.lmazulova.Expense-TrackerTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Expense Tracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Expense Tracker";
+			};
+			name = Debug;
+		};
+		CEB745F02DF9B03500DADFC6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3669X7VCBS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "ru.lmazulova.Expense-TrackerTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Expense Tracker.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Expense Tracker";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -319,6 +430,15 @@
 			buildConfigurations = (
 				CEB745CE2DF8B03900DADFC6 /* Debug */,
 				CEB745CF2DF8B03900DADFC6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CEB745EE2DF9B03500DADFC6 /* Build configuration list for PBXNativeTarget "Expense TrackerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CEB745EF2DF9B03500DADFC6 /* Debug */,
+				CEB745F02DF9B03500DADFC6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

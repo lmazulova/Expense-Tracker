@@ -1,10 +1,3 @@
-//
-//  Expense_TrackerApp.swift
-//  Expense Tracker
-//
-//  Created by user on 10.06.2025.
-//
-
 import SwiftUI
 
 @main
