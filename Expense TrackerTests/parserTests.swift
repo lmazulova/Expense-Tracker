@@ -18,7 +18,7 @@ final class Expense_TrackerTests: XCTestCase {
                 id: 1,
                 name: "Зарплата",
                 emoji: "💰",
-                isIncome: .income
+                direction: .income
             ),
             amount: Decimal(string: "1234.56")!,
             transactionDate: ISO8601DateFormatter().date(from: "2025-06-10T12:00:00Z")!,
@@ -85,7 +85,7 @@ final class Expense_TrackerTests: XCTestCase {
                 id: 1,
                 name: "Зарплата",
                 emoji: "💰",
-                isIncome: .income
+                direction: .income
             ),
             amount: Decimal(string: "1234.56")!,
             transactionDate: ISO8601DateFormatter().date(from: "2025-06-10T12:00:00Z")!,
@@ -115,7 +115,7 @@ final class Expense_TrackerTests: XCTestCase {
                 id: 1,
                 name: "Зарплата",
                 emoji: "💰",
-                isIncome: .income
+                direction: .income
             ),
             amount: Decimal(string: "1234.56")!,
             transactionDate: ISO8601DateFormatter().date(from: "2025-06-10T12:00:00Z")!,

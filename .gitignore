@@ -1,0 +1,15 @@
+# Xcode
+DerivedData/
+build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+xcuserdata/
+
+# User data
+*.xcuserstate
+
+# Debug files
+*.log
+*.swp
+*.DS_Store
