@@ -1,10 +1,3 @@
-//
-//  HistoryView.swift
-//  Expense Tracker
-//
-//  Created by user on 19.06.2025.
-//
-
 import SwiftUI
 import OSLog
 
@@ -13,8 +6,12 @@ struct HistoryView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var transactions: [Transaction] = []
     @State private var startDate: Date
-    
     @State private var endDate: Date
+    @State private var startTextWidth: CGFloat = 0
+    @State private var endTextWidth: CGFloat = 0
+    @State var selectedOption: SortingOption = .none
+    @State var selectedOrder: SortingOrder = .none
+    @State private var showSortView: Bool = false
     
     private let log = OSLog(
         subsystem: "ru.lmazulova.Expense-Tracker",
@@ -43,14 +40,41 @@ struct HistoryView: View {
     var body: some View {
         VStack {
             List {
-                
                 HStack {
                     Text("Начало")
                         .font(.system(size: 17, weight: .regular))
                     
                     Spacer()
                     
-                    CustomDatePicker(date: $startDate)
+                    ZStack {
+                    
+                        Text(startDate.formattedRu())
+                            .padding(.horizontal, 11)
+                            .padding(.vertical, 6)
+                            .background(
+                                GeometryReader { geometry in
+                                    Color.clear
+                                        .onAppear {
+                                            startTextWidth = geometry.size.width
+                                        }
+                                        .onChange(of: geometry.size.width, initial: true) { _, newValue in
+                                            startTextWidth = newValue
+                                        }
+                                }
+                            )
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(Color.mintGreen)
+                            )
+                            .foregroundColor(.black)
+                        
+                        // кладем datePicker под визуальное отображение с помощью модификатора blendMode, но выше в стэке, так он остается кликабельным и при этом не виден на экране
+                        DatePicker("", selection: $startDate, in: ...Date(), displayedComponents: .date)
+                            .labelsHidden()
+                            .blendMode(.destinationOver)
+                            .allowsHitTesting(true)
+                            .frame(width: startTextWidth)
+                    }
                 }
                 
                 HStack {
@@ -59,17 +83,51 @@ struct HistoryView: View {
                     
                     Spacer()
                     
-                    DatePicker("", selection: $endDate, in: ...Date(), displayedComponents: .date)
-                        .environment(\.locale, Locale(identifier: "ru_RU"))
-                        .labelsHidden()
-                        .background(Color.clear)
-                        .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color.mintGreen)
-                                )
-                        .foregroundColor(.black)
+                    ZStack {
+                    
+                        Text(endDate.formattedRu())
+                            .padding(.horizontal, 11)
+                            .padding(.vertical, 6)
+                            .background(
+                                GeometryReader { geometry in
+                                    Color.clear
+                                        .onAppear {
+                                            endTextWidth = geometry.size.width
+                                        }
+                                        .onChange(of: geometry.size.width, initial: true) { _, newValue in
+                                            endTextWidth = newValue
+                                        }
+                                }
+                            )
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(Color.mintGreen)
+                            )
+                            .foregroundColor(.black)
+                        
+                        // кладем datePicker под визуальное отображение с помощью модификатора blendMode, но выше в стэке, так он остается кликабельным и при этом не виден на экране
+                        DatePicker("", selection: $endDate, in: ...Date(), displayedComponents: .date)
+                            .labelsHidden()
+                            .blendMode(.destinationOver)
+                            .allowsHitTesting(true)
+                            .frame(width: endTextWidth)
+                    }
+                    
                 }
-                
+                HStack {
+                    Text("Сортировка")
+                        .font(.system(size: 17, weight: .regular))
+                    if selectedOption != .none {
+                        Circle()
+                            .fill(Color.accentColor)
+                            .frame(width: 8, height: 8, alignment: .bottom)
+                            .padding(0)
+                    }
+                }
+                .onTapGesture {
+                    showSortView = true
+                }
+
                 HStack {
                     Text("Всего")
                         .font(.system(size: 17, weight: .regular))
@@ -87,6 +145,7 @@ struct HistoryView: View {
                 }
             }
         }
+        
         .navigationBarBackButtonHidden(true)
         .onChange(of: startDate, initial: true) { _, newValue in
             startDate = Calendar.current.startOfDay(for: newValue)
@@ -102,6 +161,16 @@ struct HistoryView: View {
             if endDate < startDate {
                 startDate = Calendar.current.startOfDay(for: newValue)
             }
+            Task {
+                await loadTransactions()
+            }
+        }
+        .onChange(of: selectedOrder) { _, _ in
+            Task {
+                await loadTransactions()
+            }
+        }
+        .onChange(of: selectedOption) { _, _ in
             Task {
                 await loadTransactions()
             }
@@ -126,12 +195,57 @@ struct HistoryView: View {
                 }
             }
         }
+        .overlay(
+            Group {
+                if showSortView {
+                    ZStack {
+                        Color.black.opacity(0.3)
+                            .ignoresSafeArea()
+                            .onTapGesture { showSortView = false } // tap outside to dismiss
+                        SortView(showSortView: $showSortView, selectedOption: $selectedOption, selectedOrder: $selectedOrder)
+                            .frame(width: 350, height: 370)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color(.systemBackground))
+                                    .shadow(radius: 10)
+                            )
+                            .padding()
+                    }
+                    .transition(.opacity)
+                    .animation(.easeInOut, value: showSortView)
+                }
+            }
+        )
     }
    
     private func loadTransactions() async {
         do {
-            transactions = try await transactionService.getTransactions(from: startDate, to: endDate)
+            let newTransactions = try await transactionService.getTransactions(from: startDate, to: endDate)
                 .filter{ $0.category.direction == direction }
+            
+            //Применяем фильтрацию по выбранной категории
+            switch selectedOption {
+            case .date:
+                switch selectedOrder {
+                case .ascending:
+                    transactions = newTransactions.sorted { $0.transactionDate < $1.transactionDate }
+                case .descending:
+                    transactions = newTransactions.sorted { $0.transactionDate > $1.transactionDate }
+                case .none:
+                    transactions = newTransactions
+                }
+            case .amount:
+                switch selectedOrder {
+                case .ascending:
+                    transactions = newTransactions.sorted { $0.amount < $1.amount }
+                case .descending:
+                    transactions = newTransactions.sorted { $0.amount > $1.amount }
+                case .none:
+                    transactions = newTransactions
+                }
+            case .none:
+                transactions = newTransactions
+            }
         }
         catch {
             os_log("‼️ Ошибка загрузки транзакций.",
@@ -145,4 +259,8 @@ struct HistoryView: View {
 
     
     
+
+#Preview {
+    HistoryView(transactionService: TransactionsService(), direction: .income)
+}
 
