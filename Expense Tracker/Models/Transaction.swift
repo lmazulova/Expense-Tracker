@@ -1,7 +1,7 @@
 import Foundation
+import os.log
 
-
-struct Transaction: Hashable {
+struct Transaction: Hashable, Identifiable {
     let id: Int
     let account: BankAccountShort
     let category: Category
@@ -15,6 +15,12 @@ struct Transaction: Hashable {
 
 // MARK: - Конвертирование Transaction в json object и обратно
 extension Transaction {
+    
+    private static let log = OSLog(
+        subsystem: "ru.lmazulova.Expense-Tracker",
+        category: "TransactionParser"
+    )
+    
     var jsonObject: Any {
         return [
             "id": id,
@@ -28,7 +34,7 @@ extension Transaction {
                 "id": category.id,
                 "name": category.name,
                 "emoji": String(category.emoji),
-                "isIncome": category.isIncome == .income ? true : false
+                "isIncome": category.direction == .income ? true : false
             ],
             "amount": NSDecimalNumber(decimal: amount).stringValue,
             "transactionDate": ISO8601DateFormatter().string(from: transactionDate),
@@ -46,7 +52,7 @@ extension Transaction {
               let accountName = accountDict["name"] as? String,
               let accountBalanceStr = accountDict["balance"] as? String,
               let accountBalance = Decimal(string: accountBalanceStr),
-              let accountCurrency = accountDict["currency"] as? String,
+              let accountCurrencyStr = accountDict["currency"] as? String,
               let categoryDict = dict["category"] as? [String : Any],
               let categoryId = categoryDict["id"] as? Int,
               let categoryName = categoryDict["name"] as? String,
@@ -62,16 +68,31 @@ extension Transaction {
               let updatedAtStr = dict["updatedAt"] as? String,
               let updatedAt = ISO8601DateFormatter().date(from: updatedAtStr)
         else {
-            print("[\(Self.self).parse] — Ошибка десериализации JSON.")
+            os_log("‼️ Ошибка десериализации JSON",
+                   log: Self.log,
+                   type: .error)
             return nil
         }
         
         let comment = dict["comment"] as? String
         
+        var accountCurrency: Currency {
+            switch accountCurrencyStr {
+            case "RUB":
+                return .rub
+            case "USD":
+                return .usd
+            case "EUR":
+                return .eur
+            default:
+                return .rub
+            }
+        }
+        
         return Transaction(
             id: id,
             account: BankAccountShort(id: accountId, name: accountName, balance: accountBalance, currency: accountCurrency),
-            category: Category(id: categoryId, name: categoryName, emoji: categoryEmoji, isIncome: categoryIsIncome ? .income : .outcome),
+            category: Category(id: categoryId, name: categoryName, emoji: categoryEmoji, direction: categoryIsIncome ? .income : .outcome),
             amount: amount,
             transactionDate: transactionDate,
             comment: comment,
@@ -100,18 +121,30 @@ extension Transaction {
         "createdAt",
         "updatedAt"
     ]
-    
+  
     var csvLine: String {
+        
+        var currency: String {
+            switch account.currency {
+            case .eur:
+                return "EUR"
+            case .usd:
+                return "USD"
+            case .rub:
+                return "RUB"
+            }
+        }
+        
         let fields: [String] = [
             String(id),
             String(account.id),
             account.name,
             NSDecimalNumber(decimal: account.balance).stringValue,
-            account.currency,
+            currency,
             String(category.id),
             category.name,
             String(category.emoji),
-            category.isIncome == .income ? "true" : "false",
+            category.direction == .income ? "true" : "false",
             NSDecimalNumber(decimal: amount).stringValue,
             ISO8601DateFormatter().string(from: transactionDate),
             comment ?? "",
@@ -137,25 +170,39 @@ extension Transaction {
               let createdAt = ISO8601DateFormatter().date(from: components[12]),
               let updatedAt = ISO8601DateFormatter().date(from: components[13])
         else {
-            print("[\(Self.self).parse] — Ошибка десериализации CSV.")
+            os_log("‼️ Ошибка десериализации CSV",
+                   log: Self.log,
+                   type: .error)
             return nil
         }
         
         let comment = components[11].isEmpty ? nil : components[11]
         
+        var accountCurrency: Currency {
+            switch components[4] {
+            case "RUB":
+                return .rub
+            case "USD":
+                return .usd
+            case "EUR":
+                return .eur
+            default:
+                return .rub
+            }
+        }
         return Transaction(
             id: id,
             account: BankAccountShort(
                 id: accountId,
                 name: components[2],
                 balance: accountBalance,
-                currency: components[4]
+                currency: accountCurrency
             ),
             category: Category(
                 id: categoryId,
                 name: components[6],
                 emoji: categoryEmoji,
-                isIncome: isIncome ? .income : .outcome
+                direction: isIncome ? .income : .outcome
             ),
             amount: amount,
             transactionDate: transactionDate,

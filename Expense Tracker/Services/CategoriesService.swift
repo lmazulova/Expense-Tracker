@@ -6,19 +6,19 @@ final class CategoriesService {
             id: 1,
             name: "Еда",
             emoji: "🍔",
-            isIncome: .outcome
+            direction: .outcome
         ),
         Category(
             id: 2,
             name: "Зарплата",
             emoji: "💰",
-            isIncome: .income
+            direction: .income
         ),
         Category(
             id: 3,
             name: "Транспорт",
             emoji: "🚌",
-            isIncome: .outcome
+            direction: .outcome
         )
     ]
     
@@ -27,6 +27,6 @@ final class CategoriesService {
     }
     
     func categories(with direction: Direction) async throws -> [Category] {
-        allCategories.filter{ $0.isIncome == direction }
+        allCategories.filter{ $0.direction == direction }
     }
 }
