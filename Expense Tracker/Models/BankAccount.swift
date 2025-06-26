@@ -1,12 +1,12 @@
 import Foundation
 
-enum Currency: String {
+enum Currency: String, Codable{
     case rub = "₽"
     case usd = "$"
     case eur = "€"
 }
 
-struct BankAccount {
+struct BankAccount: Codable {
     let id: Int
     let userId: Int
     let name: String
@@ -16,7 +16,7 @@ struct BankAccount {
     let updatedAt: Date
 }
 
-struct BankAccountShort: Hashable {
+struct BankAccountShort: Hashable, Codable {
     let id: Int
     let name: String
     let balance: Decimal
