@@ -27,7 +27,7 @@ struct SpoilerView: UIViewRepresentable {
 
         let emitterCell = CAEmitterCell()
         emitterCell.contents = UIImage(named: "textSpeckle_Normal")?.cgImage
-        emitterCell.color = UIColor.white.cgColor
+        emitterCell.color = UIColor.mintGreen.cgColor
         emitterCell.contentsScale = 1.8
         emitterCell.emissionRange = .pi * 2
         emitterCell.lifetime = 1
