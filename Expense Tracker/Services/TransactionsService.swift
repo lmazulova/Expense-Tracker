@@ -3,7 +3,7 @@ import Foundation
 @Observable
 final class TransactionsService {
 
-    private var allTransactions: Set<Transaction> = [
+    private(set) var allTransactions: Set<Transaction> = [
         Transaction(
             id: 1,
             account: BankAccountShort(
@@ -138,7 +138,7 @@ final class TransactionsService {
                 emoji: "🛒",
                 direction: .outcome
             ),
-            amount: Decimal(string: "350.75")!,
+            amount: Decimal(string: "-350.75")!,
             transactionDate: Calendar.current.date(byAdding: .day, value: -2, to: Date())!,
             comment: "Покупка продуктов в супермаркете",
             createdAt: ISO8601DateFormatter().date(from: "2025-06-06T15:20:00Z")!,
@@ -158,7 +158,7 @@ final class TransactionsService {
                 emoji: "☕️",
                 direction: .outcome
             ),
-            amount: Decimal(string: "120.00")!,
+            amount: Decimal(string: "-120.00")!,
             transactionDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!,
             comment: "Кофе с друзьями",
             createdAt: ISO8601DateFormatter().date(from: "2025-06-07T10:00:00Z")!,
@@ -178,7 +178,7 @@ final class TransactionsService {
                 emoji: "🚇",
                 direction: .outcome
             ),
-            amount: Decimal(string: "50.00")!,
+            amount: Decimal(string: "-50.00")!,
             transactionDate: Calendar.current.date(byAdding: .day, value: -5, to: Date())!,
             comment: "Метро",
             createdAt: ISO8601DateFormatter().date(from: "2025-06-03T08:30:00Z")!,
@@ -198,8 +198,8 @@ final class TransactionsService {
                 emoji: "💊",
                 direction: .outcome
             ),
-            amount: Decimal(string: "200.00")!,
-            transactionDate: Date(), 
+            amount: Decimal(string: "-200.00")!,
+            transactionDate: Date(),
             comment: "Покупка лекарств",
             createdAt: Date(),
             updatedAt: Date()
@@ -218,7 +218,7 @@ final class TransactionsService {
                 emoji: "🎬",
                 direction: .outcome
             ),
-            amount: Decimal(string: "150.00")!,
+            amount: Decimal(string: "-150.00")!,
             transactionDate: Calendar.current.date(byAdding: .day, value: -4, to: Date())!,
             comment: "Кино",
             createdAt: ISO8601DateFormatter().date(from: "2025-06-04T20:00:00Z")!,
@@ -238,7 +238,7 @@ final class TransactionsService {
                 emoji: "🏠",
                 direction: .outcome
             ),
-            amount: Decimal(string: "100.00")!,
+            amount: Decimal(string: "-100.00")!,
             transactionDate: Date(),
             comment: "Покупка бытовой химии",
             createdAt: Date(),
@@ -258,7 +258,7 @@ final class TransactionsService {
                 emoji: "🎁",
                 direction: .outcome
             ),
-            amount: Decimal(string: "50.00")!,
+            amount: Decimal(string: "-50.00")!,
             transactionDate: Calendar.current.date(byAdding: .day, value: -10, to: Date())!,
             comment: "Подарок другу",
             createdAt: ISO8601DateFormatter().date(from: "2025-05-30T18:00:00Z")!,
@@ -268,7 +268,7 @@ final class TransactionsService {
             id: 13,
             account: BankAccountShort(id: 100, name: "Основной счет", balance: 200.00, currency: .rub),
             category: Category(id: 9, name: "Книги", emoji: "📚", direction: .outcome),
-            amount: Decimal(string: "80.00")!,
+            amount: Decimal(string: "-80.00")!,
             transactionDate: Date(), // today
             comment: "Покупка книги",
             createdAt: Date(),
@@ -278,7 +278,7 @@ final class TransactionsService {
             id: 14,
             account: BankAccountShort(id: 100, name: "Основной счет", balance: 120.00, currency: .rub),
             category: Category(id: 10, name: "Такси", emoji: "🚕", direction: .outcome),
-            amount: Decimal(string: "150.00")!,
+            amount: Decimal(string: "-150.00")!,
             transactionDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!,
             comment: "Поездка на такси",
             createdAt: Date(),
@@ -288,7 +288,7 @@ final class TransactionsService {
             id: 15,
             account: BankAccountShort(id: 100, name: "Основной счет", balance: 70.00, currency: .rub),
             category: Category(id: 11, name: "Одежда", emoji: "👗", direction: .outcome),
-            amount: Decimal(string: "300.00")!,
+            amount: Decimal(string: "-300.00")!,
             transactionDate: Calendar.current.date(byAdding: .day, value: -7, to: Date())!,
             comment: "Покупка футболки",
             createdAt: Date(),
@@ -298,8 +298,8 @@ final class TransactionsService {
             id: 16,
             account: BankAccountShort(id: 100, name: "Основной счет", balance: 50.00, currency: .rub),
             category: Category(id: 12, name: "Косметика", emoji: "💄", direction: .outcome),
-            amount: Decimal(string: "60.00")!,
-            transactionDate: Date(), // today
+            amount: Decimal(string: "-60.00")!,
+            transactionDate: Date(),
             comment: "Крем для лица",
             createdAt: Date(),
             updatedAt: Date()
@@ -308,7 +308,7 @@ final class TransactionsService {
             id: 17,
             account: BankAccountShort(id: 100, name: "Основной счет", balance: 30.00, currency: .rub),
             category: Category(id: 13, name: "Связь", emoji: "📱", direction: .outcome),
-            amount: Decimal(string: "20.00")!,
+            amount: Decimal(string: "-20.00")!,
             transactionDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!,
             comment: "Оплата мобильной связи",
             createdAt: Date(),
