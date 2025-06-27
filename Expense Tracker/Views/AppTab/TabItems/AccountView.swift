@@ -97,7 +97,7 @@ struct AccountView: View {
             .scrollDismissesKeyboard(.interactively)
         }
         .refreshable {
-//                Технически блок есть, что тут обновлять не ясно, т.к. у меня есть observable BankAccountManager, который автоматически синхронизирует данные
+            await bankAccount.requestForUpdate()
         }
     }
     
@@ -120,14 +120,13 @@ struct AccountView: View {
                 
                 Spacer()
                 
-                
                 TextField("0", value: $balance, format: .number)
                     .keyboardType(.decimalPad)
                     .disabled(!isEditMode)
                     .font(.system(size: 17, weight: .regular))
                     .foregroundColor(isEditMode ? .textGray : .black)
                     .fixedSize()
-                    .spoiler(isOn: $isSpoilerOn)
+//                    .spoiler(isOn: $isSpoilerOn)
                    
                 
                 if !isEditMode {

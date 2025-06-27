@@ -59,4 +59,8 @@ final class BankAccountManager {
         account = newAccount
         storage.saveAccount(account)
     }
+    
+    func requestForUpdate() async {
+//        заглушка, для последующего сетевого слоя
+    }
 }
