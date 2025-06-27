@@ -22,7 +22,7 @@ struct AccountView: View {
     @State var currency: Currency
     @State var balance: Decimal
     @State var showPopup: Bool = false
-    
+    @State var isSpoilerOn: Bool = false
     init() {
         let manager = BankAccountManager()
         _bankAccount = State(wrappedValue: manager)
@@ -37,7 +37,7 @@ struct AccountView: View {
             
             ScrollView {
                 VStack(spacing: 16) {
-                    BalanceRow(balance: $balance, currency: $currency, isEditMode: $isEditMode)
+                    BalanceRow(balance: $balance, currency: $currency, isEditMode: $isEditMode, isSpoilerOn: $isSpoilerOn)
                     CurrencyRow(currency: $currency, isEditMode: $isEditMode, showPopup: $showPopup)
                 }
                 .padding(16)
@@ -46,6 +46,7 @@ struct AccountView: View {
                     Button(action: {
                         withAnimation {
                             isEditMode.toggle()
+                            isSpoilerOn = false
                         }
                     }) {
                         Text(isEditMode ? "Сохранить" : "Редактировать")
@@ -62,6 +63,9 @@ struct AccountView: View {
                         balance = rounded
                     }
                     bankAccount.updateBalance(rounded)
+                }
+                .onShake {
+                    isSpoilerOn.toggle()
                 }
                 .overlay(
                     Group {
@@ -92,6 +96,9 @@ struct AccountView: View {
             }
             .scrollDismissesKeyboard(.interactively)
         }
+        .refreshable {
+//                Технически блок есть, что тут обновлять не ясно, т.к. у меня есть observable BankAccountManager, который автоматически синхронизирует данные
+        }
     }
     
     private struct BalanceRow: View {
@@ -100,6 +107,7 @@ struct AccountView: View {
         @Binding var balance: Decimal
         @Binding var currency: Currency
         @Binding var isEditMode: Bool
+        @Binding var isSpoilerOn: Bool
         
         var body: some View {
             HStack(spacing: 0) {
@@ -119,6 +127,8 @@ struct AccountView: View {
                     .font(.system(size: 17, weight: .regular))
                     .foregroundColor(isEditMode ? .textGray : .black)
                     .fixedSize()
+                    .spoiler(isOn: $isSpoilerOn)
+                   
                 
                 if !isEditMode {
                     Text(" \(currency.rawValue)")
