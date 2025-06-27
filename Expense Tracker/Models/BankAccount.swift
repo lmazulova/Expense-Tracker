@@ -1,6 +1,6 @@
 import Foundation
 
-enum Currency: String, Codable{
+enum Currency: String, Codable, CaseIterable {
     case rub = "₽"
     case usd = "$"
     case eur = "€"

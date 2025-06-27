@@ -201,7 +201,7 @@ struct HistoryView: View {
                     ZStack {
                         Color.black.opacity(0.3)
                             .ignoresSafeArea()
-                            .onTapGesture { showSortView = false } // tap outside to dismiss
+                            .onTapGesture { showSortView = false }
                         SortView(showSortView: $showSortView, selectedOption: $selectedOption, selectedOrder: $selectedOrder)
                             .frame(width: 350, height: 370)
                             .background(
