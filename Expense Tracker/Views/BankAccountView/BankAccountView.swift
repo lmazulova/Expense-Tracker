@@ -16,7 +16,7 @@ extension Decimal {
     }
 }
 
-struct AccountView: View {
+struct BankAccountView: View {
     @State var isEditMode: Bool = false
     @State var bankAccount: BankAccountManager
     @State var currency: Currency
