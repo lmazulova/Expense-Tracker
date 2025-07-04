@@ -1,6 +1,6 @@
 import Foundation
 
-final class CategoriesService {
+actor CategoriesService {
     private let allCategories: [Category] = [
         Category(
             id: 1,

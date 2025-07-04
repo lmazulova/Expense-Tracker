@@ -81,7 +81,6 @@ struct AppTabView: View {
                         }
                     }
                     .tag(tab)
-                
             }
         }
     }
