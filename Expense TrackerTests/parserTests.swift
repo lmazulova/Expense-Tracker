@@ -12,7 +12,7 @@ final class Expense_TrackerTests: XCTestCase {
                 id: 1,
                 name: "Основной счет",
                 balance: Decimal(string: "1000.00")!,
-                currency: "RUB"
+                currency: .rub
             ),
             category: Category(
                 id: 1,
@@ -39,7 +39,7 @@ final class Expense_TrackerTests: XCTestCase {
         XCTAssertEqual(parsed?.category.id, original.category.id)
         XCTAssertEqual(parsed?.category.emoji, original.category.emoji)
         XCTAssertEqual(parsed?.category.name, original.category.name)
-        XCTAssertEqual(parsed?.category.isIncome, original.category.isIncome)
+        XCTAssertEqual(parsed?.category.direction, original.category.direction)
         XCTAssertEqual(parsed?.amount, original.amount)
         XCTAssertEqual(parsed?.transactionDate, original.transactionDate)
         XCTAssertEqual(parsed?.comment, original.comment)
@@ -79,7 +79,7 @@ final class Expense_TrackerTests: XCTestCase {
                 id: 1,
                 name: "Основной счет",
                 balance: 1000.00,
-                currency: "RUB"
+                currency: .rub
             ),
             category: Category(
                 id: 1,
@@ -109,7 +109,7 @@ final class Expense_TrackerTests: XCTestCase {
                 id: 1,
                 name: "Основной счет",
                 balance: Decimal(string: "1000.00")!,
-                currency: "RUB"
+                currency: .rub
             ),
             category: Category(
                 id: 1,
@@ -135,7 +135,7 @@ final class Expense_TrackerTests: XCTestCase {
         XCTAssertEqual(parsed?.category.id, original.category.id)
         XCTAssertEqual(parsed?.category.emoji, original.category.emoji)
         XCTAssertEqual(parsed?.category.name, original.category.name)
-        XCTAssertEqual(parsed?.category.isIncome, original.category.isIncome)
+        XCTAssertEqual(parsed?.category.direction, original.category.direction)
         XCTAssertEqual(parsed?.amount, original.amount)
         XCTAssertEqual(parsed?.transactionDate, original.transactionDate)
         XCTAssertEqual(parsed?.comment, original.comment)

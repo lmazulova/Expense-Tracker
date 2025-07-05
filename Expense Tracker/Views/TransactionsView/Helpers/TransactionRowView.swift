@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TransactionRow: View {
+struct TransactionRowView: View {
     private let transaction: Transaction
     private let iconSize: Double = 22
     
@@ -35,7 +35,7 @@ struct TransactionRow: View {
 }
 
 #Preview {
-    TransactionRow(transaction: Transaction(
+    TransactionRowView(transaction: Transaction(
         id: 4,
         account: BankAccountShort(
             id: 1,

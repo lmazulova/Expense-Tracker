@@ -57,7 +57,7 @@ struct TransactionsListView: View {
                 
                 Section("Операции") {
                     ForEach(transactions) { transaction in
-                        TransactionRow(transaction: transaction)
+                        TransactionRowView(transaction: transaction)
                     }
                 }
             }

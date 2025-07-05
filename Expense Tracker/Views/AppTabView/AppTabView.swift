@@ -48,7 +48,7 @@ struct AppTabView: View {
                 }
             case .account:
                 NavigationStack {
-                    AccountView()
+                    BankAccountView()
                         .navigationTitle("Мой счет")
                 }
             case .categories:
@@ -81,7 +81,6 @@ struct AppTabView: View {
                         }
                     }
                     .tag(tab)
-                
             }
         }
     }

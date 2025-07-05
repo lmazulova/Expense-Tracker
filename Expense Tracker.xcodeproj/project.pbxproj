@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		CE1EC6152E16AB94009310D4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CE1EC60F2E16AB94009310D4 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		CEB745EC2DF9B03500DADFC6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -17,6 +21,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CE1EC60F2E16AB94009310D4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CEB745BF2DF8B03800DADFC6 /* Expense Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Expense Tracker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEB745E82DF9B03500DADFC6 /* Expense TrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Expense TrackerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -57,6 +62,7 @@
 			children = (
 				CEB745C12DF8B03800DADFC6 /* Expense Tracker */,
 				CEB745E92DF9B03500DADFC6 /* Expense TrackerTests */,
+				CE1EC60F2E16AB94009310D4 /* Assets.xcassets */,
 				CEB745C02DF8B03800DADFC6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -162,6 +168,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE1EC6152E16AB94009310D4 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
