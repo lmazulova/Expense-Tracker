@@ -1,10 +1,3 @@
-//
-//  AccountView.swift
-//  Expense Tracker
-//
-//  Created by user on 18.06.2025.
-//
-
 import SwiftUI
 
 extension Decimal {
@@ -76,32 +69,14 @@ struct BankAccountView: View {
                 }
             }
             .scrollDismissesKeyboard(.interactively)
-            .overlay(
-                Group {
-                    if isEditMode {
-                        ZStack {
-                            Color.black.opacity(showPopup ? 0.3 : 0)
-                                .ignoresSafeArea()
-                                .animation(.easeInOut(duration: 0.3), value: showPopup)
-                                .onTapGesture {
-                                    showPopup = false
-                                }
-                            
-                            VStack {
-                                Spacer()
-                                
-                                CurrencyPopup(currency: $currency, showPopup: $showPopup)
-                                    .padding(.horizontal, 12.5)
-                                    .padding(.bottom, 4)
-                                    .scaleEffect(showPopup ? 1.0 : 0.5)
-                                    .opacity(showPopup ? 1.0 : 0.0)
-                                    .animation(.easeInOut, value: showPopup)
-                                    .allowsHitTesting(showPopup)
-                            }
-                        }
-                    }
-                }
-            )
+            .popover(isPresented: $showPopup) {
+                CurrencyPickerView(currency: $currency)
+                    .padding(.horizontal, 12.5)
+                    .presentationDetents([.height(300)])
+                    .presentationBackground(.clear)
+                    //По какой-то причине, если не задать padding пропадает первый divider ¯\_(ツ)_/¯
+                    .padding(.bottom, 30)
+            }
         }
         .refreshable {
             await bankAccount.requestForUpdate()
@@ -251,58 +226,6 @@ struct BankAccountView: View {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(isEditMode ? .white : .mintGreen)
             )
-        }
-    }
-    
-    private struct CurrencyPopup: View {
-        @Binding var currency: Currency
-        @Binding var showPopup: Bool
-        
-        var body: some View {
-            VStack(spacing: 0) {
-                
-                Text("Валюта")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(.customBlack)
-                    .padding(.vertical, 17)
-                
-                Divider()
-                    .padding(.horizontal, 0)
-                
-                ForEach(Currency.allCases.indices, id: \.self) { index in
-                    let item = Currency.allCases[index]
-                    
-                    Button(action: {
-                        self.currency = item
-                        self.showPopup = false
-                    }) {
-                        Text(title(for: item))
-                            .font(.system(size: 17, weight: .regular))
-                            .foregroundColor(.violet)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.vertical, 17)
-                    }
-                    
-                    if index < Currency.allCases.count - 1 {
-                        Divider()
-                            .padding(.horizontal, 0)
-                    }
-                }
-            }
-            .background(Color.lightGray)
-            .cornerRadius(14)
-            .shadow(radius: 3)
-        }
-        
-        private func title(for currency: Currency) -> String {
-            switch currency {
-            case .rub:
-                return "Российский рубль ₽"
-            case .usd:
-                return "Американский доллар $"
-            case .eur:
-                return "Евро €"
-            }
         }
     }
 }
