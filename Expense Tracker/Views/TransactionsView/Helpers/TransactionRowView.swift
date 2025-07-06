@@ -9,7 +9,6 @@ import SwiftUI
 
 struct TransactionRowView: View {
     private let transaction: Transaction
-    private let iconSize: Double = 22
     
     init(transaction: Transaction) {
         self.transaction = transaction
@@ -19,7 +18,7 @@ struct TransactionRowView: View {
         HStack {
             Text(String(transaction.category.emoji))
                 .font(.system(size: 14.5))
-                .frame(width: iconSize, height: iconSize)
+                .frame(width: ViewConstants.iconSize, height: ViewConstants.iconSize)
                 .background(Color.mintGreen)
                 .clipShape(.circle)
             
@@ -30,10 +29,17 @@ struct TransactionRowView: View {
             
             Text("\(transaction.amount) \(transaction.account.currency.rawValue)")
                 .font(.system(size: 17))
+                .padding(.trailing, 16)
         }
+        .frame(idealHeight: ViewConstants.idealHeight, maxHeight: ViewConstants.maxHeight)
     }
 }
 
+private enum ViewConstants {
+    static let iconSize: Double = 22
+    static let idealHeight: Double = 44
+    static let maxHeight: Double = 64
+}
 #Preview {
     TransactionRowView(transaction: Transaction(
         id: 4,

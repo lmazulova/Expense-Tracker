@@ -7,19 +7,9 @@ struct CategoriesView: View {
         List {
             Section("Статьи") {
                 ForEach(Array(viewModel.filteredCategories.enumerated()), id: \.element.id) { index, category in
-                    let showDivider = index < viewModel.filteredCategories.count - 1
-                    CategoryRowView(category: category, showDivider: showDivider)
+                    CategoryRowView(category: category, isFirst: index == 0)
                         .listRowSeparator(.hidden)
-                        .listRowInsets(
-                            EdgeInsets(
-                                top: 0,
-                                leading: 16,
-                                bottom: 0,
-                                trailing: 0
-                            )
-                        )
-                        //Без этого модификатора, верхняя ячейка получается значительно ниже, чем остальные, какое-то стандартное поведение List
-                        .padding(.top, index == 0 ? 10 : 0)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
                 }
             }
         }

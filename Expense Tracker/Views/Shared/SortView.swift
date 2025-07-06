@@ -1,10 +1,3 @@
-//
-//  SortingView.swift
-//  Expense Tracker
-//
-//  Created by user on 20.06.2025.
-//
-
 import SwiftUI
 
 enum SortingOption: CaseIterable {
@@ -72,7 +65,7 @@ struct SortView: View {
                 }) {
                     Text("Сбросить фильтры")
                         .font(.system(size: 15))
-                        .foregroundColor(.black)
+                        .foregroundColor(.red)
                         .padding(.vertical, 15)
                         .frame(maxWidth: .infinity)
                         .background(

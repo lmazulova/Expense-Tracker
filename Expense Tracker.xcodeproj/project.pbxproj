@@ -32,9 +32,9 @@
 			path = "Expense Tracker";
 			sourceTree = "<group>";
 		};
-		CEB745E92DF9B03500DADFC6 /* Expense TrackerTests */ = {
+		CEB745E92DF9B03500DADFC6 /* UnitTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Expense TrackerTests";
+			path = UnitTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -61,7 +61,7 @@
 			isa = PBXGroup;
 			children = (
 				CEB745C12DF8B03800DADFC6 /* Expense Tracker */,
-				CEB745E92DF9B03500DADFC6 /* Expense TrackerTests */,
+				CEB745E92DF9B03500DADFC6 /* UnitTests */,
 				CE1EC60F2E16AB94009310D4 /* Assets.xcassets */,
 				CEB745C02DF8B03800DADFC6 /* Products */,
 			);
@@ -115,7 +115,7 @@
 				CEB745ED2DF9B03500DADFC6 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				CEB745E92DF9B03500DADFC6 /* Expense TrackerTests */,
+				CEB745E92DF9B03500DADFC6 /* UnitTests */,
 			);
 			name = "Expense TrackerTests";
 			packageProductDependencies = (

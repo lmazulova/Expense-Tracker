@@ -40,113 +40,33 @@ struct HistoryView: View {
     var body: some View {
         VStack {
             List {
-                HStack {
-                    Text("Начало")
-                        .font(.system(size: 17, weight: .regular))
-                    
-                    Spacer()
-                    
-                    ZStack {
-                    
-                        Text(startDate.formattedRu())
-                            .padding(.horizontal, 11)
-                            .padding(.vertical, 6)
-                            .background(
-                                GeometryReader { geometry in
-                                    Color.clear
-                                        .onAppear {
-                                            startTextWidth = geometry.size.width
-                                        }
-                                        .onChange(of: geometry.size.width, initial: true) { _, newValue in
-                                            startTextWidth = newValue
-                                        }
-                                }
-                            )
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.mintGreen)
-                            )
-                            .foregroundColor(.black)
-                        
-                        // кладем datePicker под визуальное отображение с помощью модификатора blendMode, но выше в стэке, так он остается кликабельным и при этом не виден на экране
-                        DatePicker("", selection: $startDate, in: ...Date(), displayedComponents: .date)
-                            .labelsHidden()
-                            .blendMode(.destinationOver)
-                            .allowsHitTesting(true)
-                            .frame(width: startTextWidth)
-                    }
-                }
-                
-                HStack {
-                    Text("Конец")
-                        .font(.system(size: 17, weight: .regular))
-                    
-                    Spacer()
-                    
-                    ZStack {
-                    
-                        Text(endDate.formattedRu())
-                            .padding(.horizontal, 11)
-                            .padding(.vertical, 6)
-                            .background(
-                                GeometryReader { geometry in
-                                    Color.clear
-                                        .onAppear {
-                                            endTextWidth = geometry.size.width
-                                        }
-                                        .onChange(of: geometry.size.width, initial: true) { _, newValue in
-                                            endTextWidth = newValue
-                                        }
-                                }
-                            )
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.mintGreen)
-                            )
-                            .foregroundColor(.black)
-                        
-                        // кладем datePicker под визуальное отображение с помощью модификатора blendMode, но выше в стэке, так он остается кликабельным и при этом не виден на экране
-                        DatePicker("", selection: $endDate, in: ...Date(), displayedComponents: .date)
-                            .labelsHidden()
-                            .blendMode(.destinationOver)
-                            .allowsHitTesting(true)
-                            .frame(width: endTextWidth)
-                    }
-                    
-                }
-                HStack {
-                    Text("Сортировка")
-                        .font(.system(size: 17, weight: .regular))
-                    if selectedOption != .none {
-                        Circle()
-                            .fill(Color.accentColor)
-                            .frame(width: 8, height: 8, alignment: .bottom)
-                            .padding(0)
-                    }
-                }
-                .onTapGesture {
-                    showSortView = true
-                }
-
-                HStack {
-                    Text("Всего")
-                        .font(.system(size: 17, weight: .regular))
-                    
-                    Spacer()
-                    
-                    Text("\(sumOfTransactions) \(transactions.first?.account.currency.rawValue ?? "")")
-                        .font(.system(size: 17, weight: .regular))
-                }
+                startDateRow
+                endDateRow
+                sortRow
+                    .onTapGesture { showSortView = true }
+                amountRow
                 
                 Section("Операции") {
-                    ForEach(transactions) { transaction in
-                        TransactionRowView(transaction: transaction)
+                    ForEach(Array(transactions.enumerated()), id: \.element.id) { index, transaction in
+                        VStack(spacing: 0) {
+                            Divider()
+                                .padding(.leading, 30)
+                                .opacity(index == 0 ? 0 : 1)
+                            
+                            TransactionRowView(transaction: transaction)
+                            
+                            Divider()
+                                .padding(.leading, 30)
+                                .opacity(0)
+                        }
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                     }
                 }
             }
         }
-        
         .navigationBarBackButtonHidden(true)
+//     Это все перенесу в VM
         .onChange(of: startDate, initial: true) { _, newValue in
             startDate = Calendar.current.startOfDay(for: newValue)
             if startDate > endDate {
@@ -177,16 +97,7 @@ struct HistoryView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button(action: {dismiss()}) {
-                    HStack {
-                        Image(systemName: "chevron.backward")
-                            .frame(width: 17, height: 22)
-                            .foregroundStyle(Color.violet)
-                        Text("Назад")
-                            .font(.system(size: 17, weight: .regular))
-                            .foregroundStyle(Color.violet)
-                    }
-                }
+                BackButton(action: {dismiss()})
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: {}) {
@@ -217,7 +128,54 @@ struct HistoryView: View {
             }
         )
     }
-   
+    
+    private var startDateRow: some View {
+        HStack {
+            Text("Начало")
+                .font(.system(size: 17, weight: .regular))
+            
+            Spacer()
+            
+            CustomDatePicker(selectedDate: $startDate)
+        }
+    }
+    
+    private var endDateRow: some View {
+        HStack {
+            Text("Конец")
+                .font(.system(size: 17, weight: .regular))
+            
+            Spacer()
+            
+            CustomDatePicker(selectedDate: $endDate)
+        }
+    }
+    
+    private var sortRow: some View {
+        HStack {
+            Text("Сортировка")
+                .font(.system(size: 17, weight: .regular))
+            if selectedOption != .none {
+                Circle()
+                    .fill(Color.accentColor)
+                    .frame(width: 8, height: 8, alignment: .bottom)
+                    .padding(0)
+            }
+        }
+    }
+    
+    private var amountRow: some View {
+        HStack {
+            Text("Всего")
+                .font(.system(size: 17, weight: .regular))
+            
+            Spacer()
+            
+            Text("\(sumOfTransactions) \(transactions.first?.account.currency.rawValue ?? "")")
+                .font(.system(size: 17, weight: .regular))
+        }
+    }
+    
     private func loadTransactions() async {
         do {
             let newTransactions = try await transactionService.getTransactions(from: startDate, to: endDate)

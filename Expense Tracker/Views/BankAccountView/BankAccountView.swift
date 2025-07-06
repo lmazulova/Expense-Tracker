@@ -12,6 +12,7 @@ extension Decimal {
 struct BankAccountView: View {
     @State private var showPopup: Bool = false
     @State var viewModel: BankAccountViewModel = BankAccountViewModel()
+    @FocusState private var textFieldIsFocused: Bool
     
     var body: some View {
         ScrollView {
@@ -73,10 +74,11 @@ struct BankAccountView: View {
                     .foregroundColor(.black)
             } else {
                 TextField("Введите баланс", text: $viewModel.balanceText)
+                    .font(.system(size: 17, weight: .regular))
+                    .focused($textFieldIsFocused)
+                    .foregroundColor(textFieldIsFocused ? .black : .textGray)
                     .keyboardType(.decimalPad)
                     .multilineTextAlignment(.trailing)
-                    .font(.system(size: 17, weight: .regular))
-                    .foregroundColor(viewModel.isEditMode ? .textGray : .black)
                     .fixedSize()
                     .onTapGesture {
                         // При первом нажатии очищаем поле и запоминаем оригинальное значение

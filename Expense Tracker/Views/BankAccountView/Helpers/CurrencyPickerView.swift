@@ -41,7 +41,7 @@ struct CurrencyPickerView: View {
                 }
             }
         }
-        .background(Color.lightGray)
+        .background(Color.customLightGray)
         .cornerRadius(14)
         .shadow(radius: 3)
     }

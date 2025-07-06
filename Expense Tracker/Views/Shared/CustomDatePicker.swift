@@ -7,56 +7,35 @@
 
 import SwiftUI
 
-struct CustomDatePicker: UIViewRepresentable {
-    @Binding var date: Date
-    var maximumDate: Date = Date()
-    func makeUIView(context: Context) -> UIView {
-        let container = UIView()
-        container.backgroundColor = UIColor(named: "mintGreen")
-        container.layer.cornerRadius = 8
-        
-        let picker = UIDatePicker()
-        picker.datePickerMode = .date
-        picker.preferredDatePickerStyle = .compact
-        picker.backgroundColor = .clear
-        picker.maximumDate = maximumDate
-        picker.addTarget(context.coordinator, action: #selector(Coordinator.dateChanged(_:)), for: .valueChanged)
-        picker.tintColor = UIColor(named: "AccentColor")
-        
-        picker.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(picker)
-        
-        NSLayoutConstraint.activate([
-            picker.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 0),
-            picker.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: 0),
-            picker.topAnchor.constraint(equalTo: container.topAnchor, constant: 0),
-            picker.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: 0)
-        ])
-        
-        context.coordinator.picker = picker
-        return container
-    }
+struct CustomDatePicker: View {
+    @Binding var selectedDate: Date
+    @State var textWidth: CGFloat = 0
     
-    func updateUIView(_ uiView: UIView, context: Context) {
-        if let picker = context.coordinator.picker {
-            picker.date = date
-            picker.maximumDate = maximumDate
-        }
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-    
-    class Coordinator: NSObject {
-        var parent: CustomDatePicker
-        weak var picker: UIDatePicker?
-        init(_ parent: CustomDatePicker) {
-            self.parent = parent
-        }
-        
-        @objc func dateChanged(_ sender: UIDatePicker) {
-            parent.date = sender.date
+    var body: some View {
+        ZStack {
+            Text(selectedDate.formattedRu())
+                .padding(.horizontal, 11)
+                .padding(.vertical, 6)
+                .background(
+                    GeometryReader { geometry in
+                        Color.clear
+                            .onChange(of: geometry.size.width, initial: true) { _, newValue in
+                                textWidth = newValue
+                            }
+                    }
+                )
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.mintGreen)
+                )
+                .foregroundColor(.black)
+            
+            // кладем datePicker под визуальное отображение с помощью модификатора blendMode, но выше в стэке, так он остается кликабельным и при этом не виден на экране
+            DatePicker("", selection: $selectedDate, in: ...Date(), displayedComponents: .date)
+                .labelsHidden()
+                .blendMode(.destinationOver)
+                .allowsHitTesting(true)
+                .frame(width: textWidth)
         }
     }
 }
