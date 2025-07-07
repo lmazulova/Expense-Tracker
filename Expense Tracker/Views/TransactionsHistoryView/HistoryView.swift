@@ -43,7 +43,6 @@ struct HistoryView: View {
                 startDateRow
                 endDateRow
                 sortRow
-                    .onTapGesture { showSortView = true }
                 amountRow
                 
                 Section("Операции") {
@@ -108,23 +107,21 @@ struct HistoryView: View {
         }
         .overlay(
             Group {
-                if showSortView {
-                    ZStack {
-                        Color.black.opacity(0.3)
-                            .ignoresSafeArea()
-                            .onTapGesture { showSortView = false }
-                        SortView(showSortView: $showSortView, selectedOption: $selectedOption, selectedOrder: $selectedOrder)
-                            .frame(width: 350, height: 370)
-                            .background(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .fill(Color(.systemBackground))
-                                    .shadow(radius: 10)
-                            )
-                            .padding()
-                    }
-                    .transition(.opacity)
-                    .animation(.easeInOut, value: showSortView)
+                ZStack {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                        .onTapGesture { showSortView = false }
+                    SortView(showSortView: $showSortView, selectedOption: $selectedOption, selectedOrder: $selectedOrder)
+                        .frame(height: 310)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color(.systemBackground))
+                                .shadow(radius: 10)
+                        )
+                        .padding()
                 }
+                .opacity(showSortView ? 1 : 0)
+                .animation(.easeInOut, value: showSortView)
             }
         )
     }
@@ -152,16 +149,21 @@ struct HistoryView: View {
     }
     
     private var sortRow: some View {
-        HStack {
-            Text("Сортировка")
-                .font(.system(size: 17, weight: .regular))
-            if selectedOption != .none {
-                Circle()
-                    .fill(Color.accentColor)
-                    .frame(width: 8, height: 8, alignment: .bottom)
-                    .padding(0)
+        Button(action: { showSortView = true }) {
+            HStack {
+                Text("Сортировка")
+                    .font(.system(size: 17, weight: .regular))
+                if selectedOption != .none {
+                    Circle()
+                        .fill(Color.accentColor)
+                        .frame(width: 8, height: 8, alignment: .bottom)
+                        .padding(0)
+                }
+                Spacer()
             }
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
     }
     
     private var amountRow: some View {
