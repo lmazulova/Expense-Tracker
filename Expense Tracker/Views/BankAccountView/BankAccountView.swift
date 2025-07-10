@@ -1,17 +1,10 @@
 import SwiftUI
 
-extension Decimal {
-    func rounded(scale: Int, mode: NSDecimalNumber.RoundingMode = .plain) -> Decimal {
-        var result = Decimal()
-        var value = self
-        NSDecimalRound(&result, &value, scale, mode)
-        return result
-    }
-}
-
 struct BankAccountView: View {
     @State private var showPopup: Bool = false
+    @State var isSpoilerOn: Bool = false
     @State var viewModel: BankAccountViewModel = BankAccountViewModel()
+    @State var balanceText: String = ""
     @FocusState private var textFieldIsFocused: Bool
     
     var body: some View {
@@ -23,6 +16,15 @@ struct BankAccountView: View {
         .frame(maxHeight: .infinity, alignment: .top)
         .toolbar {
             Button(action: {
+                isSpoilerOn = false
+                checkLastDigit()
+                if viewModel.isEditMode {
+                    if let value = balanceText.decimalFromLocalizedString() {
+                        viewModel.setBalance(balance: value)
+                    }
+                } else {
+                    balanceText = viewModel.balance.formattedWithLocale()
+                }
                 viewModel.toggleEditMode()
             }) {
                 Text(viewModel.isEditMode ? "Сохранить" : "Редактировать")
@@ -30,8 +32,11 @@ struct BankAccountView: View {
                     .foregroundColor(.violet)
             }
         }
+        .onAppear {
+            balanceText = viewModel.balance.formattedWithLocale()
+        }
         .onShake {
-            viewModel.isSpoilerOn.toggle()
+            isSpoilerOn.toggle()
         }
         .if(viewModel.isEditMode) { view in
             view.scrollDismissesKeyboard(.interactively)
@@ -44,10 +49,8 @@ struct BankAccountView: View {
         .popover(isPresented: $showPopup) {
             CurrencyPickerView(currency: $viewModel.currency)
                 .padding(.horizontal, 12.5)
-                .presentationDetents([.height(300)])
+                .presentationDetents([.height(350)])
                 .presentationBackground(.clear)
-                //По какой-то причине, если не задать padding пропадает первый divider ¯\_(ツ)_/¯
-                .padding(.bottom, 30)
         }
         .background(Color(.systemGroupedBackground))
     }
@@ -64,40 +67,28 @@ struct BankAccountView: View {
             Spacer()
             
             if !viewModel.isEditMode {
-                Text(viewModel.balanceText)
+                Text(balanceText)
                     .font(.system(size: 17, weight: .regular))
                     .foregroundColor(.black)
-                    .spoiler(isOn: $viewModel.isSpoilerOn)
+                    .spoiler(isOn: $isSpoilerOn)
                 
                 Text(" \(viewModel.currency.rawValue)")
                     .font(.system(size: 17, weight: .regular))
                     .foregroundColor(.black)
             } else {
-                TextField("Введите баланс", text: $viewModel.balanceText)
+                TextField("Введите баланс", text: $balanceText)
                     .font(.system(size: 17, weight: .regular))
                     .focused($textFieldIsFocused)
                     .foregroundColor(textFieldIsFocused ? .black : .textGray)
                     .keyboardType(.decimalPad)
                     .multilineTextAlignment(.trailing)
                     .fixedSize()
-                    .onTapGesture {
-                        // При первом нажатии очищаем поле и запоминаем оригинальное значение
-                        //                        if !hasUserInput {
-                        //                            originalBalanceText = balanceText
-                        //                            balanceText = ""
-                        //                            hasUserInput = true
-                        //                        }
+                    .onChange(of: balanceText) { _, newValue in
+                        balanceText = DecimalInputFormatter.filterInput(input: newValue )
                     }
-//                    .onChange(of: balanceText) { _, newValue in
-                        //                            handleBalanceTextChange(newValue)
-//                    }
-//                    .onSubmit {
-                        // При отправке (скрытии клавиатуры) проверяем, был ли введен текст
-//                        if balanceText.isEmpty {
-                            //                            balanceText = originalBalanceText
-                            //                            hasUserInput = false
-//                        }
-//                    }
+                    .onChange(of: textFieldIsFocused) {
+                        checkLastDigit()
+                    }
             }
         }
         .padding(11)
@@ -126,6 +117,13 @@ struct BankAccountView: View {
         .background {
             RoundedRectangle(cornerRadius: 10)
                 .fill(viewModel.isEditMode ? .white : .mintGreen)
+        }
+    }
+    
+    //Проверка, что последний введенный символ не является разделителем
+    private func checkLastDigit() {
+        if let lastDigit = balanceText.last, lastDigit == "." || lastDigit == "," {
+            balanceText = String(balanceText.dropLast())
         }
     }
 }

@@ -24,6 +24,8 @@ struct CurrencyPickerView: View {
             
             ForEach(Currency.allCases.indices, id: \.self) { index in
                 let item = Currency.allCases[index]
+                Divider()
+                    .opacity(index == 0 ? 0 : 1)
                 
                 Button(action: {
                     self.currency = item
@@ -36,9 +38,8 @@ struct CurrencyPickerView: View {
                         .padding(.vertical, 17)
                 }
                 
-                if index < Currency.allCases.count - 1 {
-                    Divider()
-                }
+                Divider()
+                    .opacity(0)
             }
         }
         .background(Color.customLightGray)

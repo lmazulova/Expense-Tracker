@@ -12,42 +12,34 @@ import SwiftUI
 final class BankAccountViewModel {
     var isEditMode: Bool = false
     var bankAccountManager: BankAccountManager = BankAccountManager()
-    var currency: Currency = .rub {
+    var currency: Currency = BankAccountManager().account.currency {
         didSet {
             bankAccountManager.updateCurrency(currency)
         }
     }
-    var balance: Decimal = 0 {
+    private(set) var balance: Decimal = BankAccountManager().account.balance {
         didSet {
             bankAccountManager.updateBalance(balance)
         }
     }
-    var isSpoilerOn: Bool = false
-    var balanceText: String = ""
-    
-    private let formatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.groupingSeparator = " " // пробел между разрядами
-        formatter.minimumFractionDigits = 0
-        formatter.maximumFractionDigits = 2
-        
-        return formatter
-    }()
     
     func toggleEditMode() {
         withAnimation {
             isEditMode.toggle()
-            isSpoilerOn = false
             if !isEditMode {
                 // При выходе из режима редактирования обновляем текст
-//                balanceText = "\(balance)"
-//                balance = Dec
+                
+            } else {
+//                initialBalanceText = balanceText
             }
         }
     }
     
     func requestForUpdate() async {
         await bankAccountManager.requestForUpdate()
+    }
+    
+    func setBalance(balance: Decimal) {
+        self.balance = balance
     }
 }
