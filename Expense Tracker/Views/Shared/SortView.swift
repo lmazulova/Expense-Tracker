@@ -1,23 +1,20 @@
 import SwiftUI
 
-enum SortingOption: CaseIterable {
-    case amount
-    case date
-    case none
-}
-
-enum SortingOrder: CaseIterable {
-    case ascending
-    case descending
-    case none
-}
-
 struct SortView: View {
-    @Binding var showSortView: Bool
-    @Binding var selectedOption: SortingOption
-    @Binding var selectedOrder: SortingOrder
+    @State var selectedOption: SortingOption
+    @State var selectedOrder: SortingOrder
     private var isDoneButtonDisabled: Bool {
         selectedOption == .none || selectedOrder == .none
+    }
+    //используем callback чтобы не передавать в sortView информацию о viewModel.
+    var onApply: ((SortingOption, SortingOrder) -> Void)?
+    var onReset: (() -> Void)?
+    
+    init(selectedOption: SortingOption, selectedOrder: SortingOrder, onApply: ((SortingOption, SortingOrder) -> Void)?, onReset: (() -> Void)?) {
+        _selectedOption = State(initialValue: selectedOption)
+        _selectedOrder = State(initialValue: selectedOrder)
+        self.onApply = onApply
+        self.onReset = onReset
     }
     
     var body: some View {
@@ -57,7 +54,7 @@ struct SortView: View {
                 Button(action: {
                     selectedOption = .none
                     selectedOrder = .none
-                    showSortView = false
+                    onReset?()
                 }) {
                     Text("Сбросить фильтры")
                         .font(.system(size: 15))
@@ -69,7 +66,9 @@ struct SortView: View {
                                 .fill(Color.backgroundGray)
                         )
                 }
-                Button(action: { showSortView = false }) {
+                Button(action: {
+                    onApply?(selectedOption, selectedOrder)
+                }) {
                     Text("Готово")
                         .font(.system(size: 15, weight: .bold))
                         .foregroundColor(.white)

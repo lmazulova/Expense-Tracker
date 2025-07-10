@@ -1,10 +1,3 @@
-//
-//  TransactionsListView.swift
-//  Expense Tracker
-//
-//  Created by user on 18.06.2025.
-//
-
 import SwiftUI
 import OSLog
 
@@ -70,7 +63,7 @@ struct TransactionsListView: View {
                 }
             }
             .navigationDestination(isPresented: $showHistory) {
-                HistoryView(transactionService: transactionService, direction: direction)
+                HistoryView(viewModel: HistoryViewModel(direction: direction))
                     .navigationTitle("Моя история")
             }
             .navigationDestination(for: Transaction.self) { transaction in

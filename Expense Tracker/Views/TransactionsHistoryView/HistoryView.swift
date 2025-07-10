@@ -2,39 +2,16 @@ import SwiftUI
 import OSLog
 
 struct HistoryView: View {
-    
     @Environment(\.dismiss) private var dismiss
-    @State private var transactions: [Transaction] = []
-    @State private var startDate: Date
-    @State private var endDate: Date
-    @State private var startTextWidth: CGFloat = 0
-    @State private var endTextWidth: CGFloat = 0
-    @State var selectedOption: SortingOption = .none
-    @State var selectedOrder: SortingOrder = .none
-    @State private var showSortView: Bool = false
+    @State private var viewModel: HistoryViewModel
     
     private let log = OSLog(
         subsystem: "ru.lmazulova.Expense-Tracker",
         category: "HistoryView"
     )
     
-    private var sumOfTransactions: Decimal {
-        var result: Decimal = 0
-        for transaction in transactions {
-            result += transaction.amount
-        }
-        return result
-    }
-    
-    private var transactionService: TransactionsService
-    private var direction: Direction
-    
-    init(transactionService: TransactionsService = TransactionsService(), direction: Direction) {
-        let initialStartDate = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
-        _startDate = State(initialValue: Calendar.current.startOfDay(for: initialStartDate))
-        _endDate = State(initialValue: Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date())
-        self.transactionService = transactionService
-        self.direction = direction
+    init(viewModel: HistoryViewModel) {
+        self._viewModel = State(wrappedValue: viewModel)
     }
     
     var body: some View {
@@ -46,7 +23,7 @@ struct HistoryView: View {
                 amountRow
                 
                 Section("Операции") {
-                    ForEach(Array(transactions.enumerated()), id: \.element.id) { index, transaction in
+                    ForEach(Array(viewModel.sortedTransactions.enumerated()), id: \.element.id) { index, transaction in
                         VStack(spacing: 0) {
                             Divider()
                                 .padding(.leading, 30)
@@ -65,35 +42,6 @@ struct HistoryView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-//     Это все перенесу в VM
-        .onChange(of: startDate, initial: true) { _, newValue in
-            startDate = Calendar.current.startOfDay(for: newValue)
-            if startDate > endDate {
-                endDate = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: newValue) ?? newValue
-            }
-            Task {
-                await loadTransactions()
-            }
-        }
-        .onChange(of: endDate) { _, newValue in
-            endDate = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: newValue) ?? newValue
-            if endDate < startDate {
-                startDate = Calendar.current.startOfDay(for: newValue)
-            }
-            Task {
-                await loadTransactions()
-            }
-        }
-        .onChange(of: selectedOrder) { _, _ in
-            Task {
-                await loadTransactions()
-            }
-        }
-        .onChange(of: selectedOption) { _, _ in
-            Task {
-                await loadTransactions()
-            }
-        }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 BackButton(action: {dismiss()})
@@ -110,20 +58,26 @@ struct HistoryView: View {
                 ZStack {
                     Color.black.opacity(0.3)
                         .ignoresSafeArea()
-                        .onTapGesture { showSortView = false }
-                    SortView(showSortView: $showSortView, selectedOption: $selectedOption, selectedOrder: $selectedOrder)
-                        .frame(height: 310)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20)
-                                .fill(Color(.systemBackground))
-                                .shadow(radius: 10)
-                        )
-                        .padding()
+                    SortView(selectedOption: viewModel.selectedOption, selectedOrder: viewModel.selectedOrder) { option, order in
+                        viewModel.setFilters(option: option, order: order)
+                    } onReset: {
+                        viewModel.resetFilters()
+                    }
+                    .frame(height: 310)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color(.systemBackground))
+                            .shadow(radius: 10)
+                    )
+                    .padding()
                 }
-                .opacity(showSortView ? 1 : 0)
-                .animation(.easeInOut, value: showSortView)
+                .opacity(viewModel.showSortView ? 1 : 0)
+                .animation(.easeInOut, value: viewModel.showSortView)
             }
         )
+        .task {
+            await viewModel.loadTransactions()
+        }
     }
     
     private var startDateRow: some View {
@@ -133,7 +87,7 @@ struct HistoryView: View {
             
             Spacer()
             
-            CustomDatePicker(selectedDate: $startDate)
+            CustomDatePicker(selectedDate: $viewModel.startDate)
         }
     }
     
@@ -144,21 +98,15 @@ struct HistoryView: View {
             
             Spacer()
             
-            CustomDatePicker(selectedDate: $endDate)
+            CustomDatePicker(selectedDate: $viewModel.endDate)
         }
     }
     
     private var sortRow: some View {
-        Button(action: { showSortView = true }) {
+        Button(action: { viewModel.showSortView = true }) {
             HStack {
                 Text("Сортировка")
                     .font(.system(size: 17, weight: .regular))
-                if selectedOption != .none {
-                    Circle()
-                        .fill(Color.accentColor)
-                        .frame(width: 8, height: 8, alignment: .bottom)
-                        .padding(0)
-                }
                 Spacer()
             }
             .contentShape(Rectangle())
@@ -173,54 +121,13 @@ struct HistoryView: View {
             
             Spacer()
             
-            Text("\(sumOfTransactions) \(transactions.first?.account.currency.rawValue ?? "")")
+            Text("\(viewModel.sumOfTransactions) \(viewModel.currency.rawValue)")
                 .font(.system(size: 17, weight: .regular))
-        }
-    }
-    
-    private func loadTransactions() async {
-        do {
-            let newTransactions = try await transactionService.getTransactions(from: startDate, to: endDate)
-                .filter{ $0.category.direction == direction }
-            
-            //Применяем фильтрацию по выбранной категории
-            switch selectedOption {
-            case .date:
-                switch selectedOrder {
-                case .ascending:
-                    transactions = newTransactions.sorted { $0.transactionDate < $1.transactionDate }
-                case .descending:
-                    transactions = newTransactions.sorted { $0.transactionDate > $1.transactionDate }
-                case .none:
-                    transactions = newTransactions
-                }
-            case .amount:
-                switch selectedOrder {
-                case .ascending:
-                    transactions = newTransactions.sorted { $0.amount < $1.amount }
-                case .descending:
-                    transactions = newTransactions.sorted { $0.amount > $1.amount }
-                case .none:
-                    transactions = newTransactions
-                }
-            case .none:
-                transactions = newTransactions
-            }
-        }
-        catch {
-            os_log("‼️ Ошибка загрузки транзакций.",
-                   log: log,
-                   type: .error)
-            
-            transactions = []
         }
     }
 }
 
-    
-    
-
 #Preview {
-    HistoryView(transactionService: TransactionsService(), direction: .income)
+//    HistoryView(transactionService: TransactionsService(), direction: .income)
 }
 
