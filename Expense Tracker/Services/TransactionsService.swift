@@ -2,7 +2,11 @@ import Foundation
 
 @Observable
 final class TransactionsService {
-
+    static let shared: TransactionsService = TransactionsService()
+    
+    private init() {
+    }
+    
     private(set) var allTransactions: Set<Transaction> = [
         Transaction(
             id: 1,

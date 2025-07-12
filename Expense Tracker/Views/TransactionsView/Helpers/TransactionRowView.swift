@@ -21,9 +21,15 @@ struct TransactionRowView: View {
                 .frame(width: ViewConstants.iconSize, height: ViewConstants.iconSize)
                 .background(Color.mintGreen)
                 .clipShape(.circle)
-            
-            Text(transaction.category.name)
-                .font(.system(size: 17))
+            VStack(alignment: .leading) {
+                Text(transaction.category.name)
+                    .font(.system(size: 17))
+                if let comment = transaction.comment, !comment.isEmpty {
+                    Text(comment)
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color.textGray)
+                }
+            }
             
             Spacer()
             

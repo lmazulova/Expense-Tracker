@@ -2,7 +2,9 @@ import SwiftUI
 import OSLog
 
 struct TransactionsListView: View {
+    @State var isModalPresented: Bool = false
     private var direction: Direction
+    @State var selectedTransaction: Transaction?
     
     private var startDate: Date {
         Calendar.current.startOfDay(for: Date())
@@ -14,7 +16,7 @@ struct TransactionsListView: View {
         return calendar.date(bySettingHour: 23, minute: 59, second: 59, of: today) ?? today
     }
     
-    private var transactionService = TransactionsService()
+    private var transactionService = TransactionsService.shared
     @State private var transactions: [Transaction] = []
     @State private var showHistory: Bool = false
     
@@ -41,14 +43,15 @@ struct TransactionsListView: View {
                     amountView
                     
                     Section("Операции") {
-                        ForEach(Array(transactions.enumerated()), id: \.element.id) { index, transaction in
+                        ForEach(Array(transactions.enumerated()), id: \.element) { index, transaction in
                             VStack(spacing: 0) {
                                 Divider()
                                     .padding(.leading, 30)
                                     .opacity(index == 0 ? 0 : 1)
-                                
-                                NavigationLink(value: transaction) {
+                                HStack {
                                     TransactionRowView(transaction: transaction)
+                                    Image(systemName: "chevron.right")
+                                        .foregroundStyle(.textGray)
                                 }
                                 .padding(.trailing, 16)
                                 
@@ -56,10 +59,18 @@ struct TransactionsListView: View {
                                     .padding(.leading, 30)
                                     .opacity(0)
                             }
+                            .onTapGesture {
+                                selectedTransaction = transaction
+                            }
                             .listRowSeparator(.hidden)
                             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
                         }
                     }
+                }
+            }
+            .onChange(of: selectedTransaction) { _, newValue in
+                if newValue != nil {
+                    isModalPresented = true
                 }
             }
             .navigationDestination(isPresented: $showHistory) {
@@ -69,7 +80,9 @@ struct TransactionsListView: View {
             .navigationDestination(for: Transaction.self) { transaction in
                 
             }
-            Button(action: { }) {
+            Button(action: {
+                isModalPresented = true
+            }) {
                 Image("plusButton")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -87,6 +100,11 @@ struct TransactionsListView: View {
         }
         .task {
             await loadTransactions()
+        }
+        .fullScreenCover(isPresented: $isModalPresented, onDismiss: {
+            selectedTransaction = nil
+        }) {
+            TransactionCreationView(direction: direction, selectedTransaction: selectedTransaction)
         }
     }
     
