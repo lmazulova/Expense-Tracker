@@ -145,12 +145,12 @@ class AnalysisViewController: UIViewController {
             picker.trailingAnchor.constraint(equalTo: container.trailingAnchor),
             picker.heightAnchor.constraint(equalToConstant: 34),
         ])
-
+        
         cell.accessoryView = container
         cell.accessoryView?.frame.size = CGSize(width: 140, height: 34)
     }
 
-    private func setupSumCell(_ cell: UITableViewCell) {
+    private func setupAmount(_ cell: UITableViewCell) {
         cell.textLabel?.text = "Сумма"
         cell.textLabel?.font = .systemFont(ofSize: 17)
         cell.textLabel?.textColor = .black
@@ -162,6 +162,42 @@ class AnalysisViewController: UIViewController {
             sumLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -16),
             sumLabel.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
         ])
+    }
+    
+    private func setupSortCell(_ cell: UITableViewCell) {
+        cell.textLabel?.text = "Сортировка"
+        cell.textLabel?.font = .systemFont(ofSize: 17)
+        cell.textLabel?.textColor = .black
+
+        // Кнопка для выбора сортировки
+        let button = UIButton(type: .system)
+        button.setTitle(sortingOrder.rawValue, for: .normal)
+        button.setTitleColor(.black, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 17)
+        button.backgroundColor = .mintGreen
+        button.layer.cornerRadius = 6
+        button.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
+        button.showsMenuAsPrimaryAction = true
+        
+        // Создаём меню
+        let menu = UIMenu(children: SortingOrder.allCases.map { order in
+            UIAction(
+                title: order.rawValue,
+                state: order == sortingOrder ? .on : .off
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.sortingOrder = order
+                button.setTitle(order.rawValue, for: .normal)
+                self.viewModel.setFilters(order: order)
+                self.viewModel.sortCategories()
+                self.tableView.reloadData()
+            }
+        })
+        button.menu = menu
+
+        // Добавляем в accessoryView
+        cell.accessoryView = button
+        cell.accessoryView?.frame.size = CGSize(width: 150, height: 34)
     }
 }
 
@@ -199,13 +235,13 @@ extension AnalysisViewController: UITableViewDataSource, UITableViewDelegate {
                 let cell = tableView.dequeueReusableCell(withIdentifier: "sortCell", for: indexPath)
                 cell.backgroundColor = .white
                 cell.selectionStyle = .none
-                // setupSortCell(cell) // если понадобится
+                setupSortCell(cell)
                 return cell
             case 3:
                 let cell = tableView.dequeueReusableCell(withIdentifier: "amountCell", for: indexPath)
                 cell.backgroundColor = .white
                 cell.selectionStyle = .none
-                setupSumCell(cell)
+                setupAmount(cell)
                 return cell
             default:
                 return UITableViewCell()

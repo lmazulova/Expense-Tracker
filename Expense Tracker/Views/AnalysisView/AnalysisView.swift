@@ -1,10 +1,3 @@
-//
-//  AnalysisView.swift
-//  Expense Tracker
-//
-//  Created by user on 12.07.2025.
-//
-
 import SwiftUI
 
 struct AnalysisView: UIViewControllerRepresentable {
