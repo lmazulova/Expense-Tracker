@@ -2,246 +2,234 @@ import UIKit
 import SwiftUI
 
 class AnalysisViewController: UIViewController {
+    // MARK: - Properties
+
     private let direction: Direction
-    private var viewModel: AnalysisViewModel
-    private var selectedOrder: SortingOrder
     private let currency: Currency = BankAccountManager().account.currency
-    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
-    private let headerLabel = UILabel()
-    private let totalAmountLabel = UILabel()
-    private let dateToPicker = CustomDatePickerView()
-    private let dateFromPicker = CustomDatePickerView()
-    
+    private var viewModel: AnalysisViewModel
+    private var sortingOrder: SortingOrder
+
+    // MARK: - Lazy Views
+
+    private lazy var titleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Анализ"
+        label.font = .systemFont(ofSize: 34, weight: .bold)
+        label.textColor = .black
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    private lazy var sumLabel: UILabel = {
+        let label = UILabel()
+        label.text = "\(viewModel.sumOfTransactions) \(currency.rawValue)"
+        label.font = .systemFont(ofSize: 17, weight: .regular)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    private lazy var fromDatePicker: CustomDatePickerView = {
+        let picker = CustomDatePickerView()
+        picker.onDateChanged = handleFromDateChange
+        return picker
+    }()
+
+    private lazy var toDatePicker: CustomDatePickerView = {
+        let picker = CustomDatePickerView()
+        picker.onDateChanged = handleToDateChange
+        return picker
+    }()
+
+    private lazy var tableView: UITableView = {
+        let table = UITableView(frame: .zero, style: .insetGrouped)
+        table.backgroundColor = .clear
+        table.separatorStyle = .singleLine
+        table.dataSource = self
+        table.delegate = self
+        table.translatesAutoresizingMaskIntoConstraints = false
+        table.register(UITableViewCell.self, forCellReuseIdentifier: "startDateCell")
+        table.register(UITableViewCell.self, forCellReuseIdentifier: "endDateCell")
+        table.register(UITableViewCell.self, forCellReuseIdentifier: "sortCell")
+        table.register(UITableViewCell.self, forCellReuseIdentifier: "amountCell")
+        table.register(TransactionCell.self, forCellReuseIdentifier: TransactionCell.identifier)
+        return table
+    }()
+
+    // MARK: - Initializer
+
     init(direction: Direction) {
         self.direction = direction
         self.viewModel = AnalysisViewModel(direction: direction)
-        self.selectedOrder = viewModel.selectedOrder
-        
+        self.sortingOrder = viewModel.selectedOrder
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
+    // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupConstraints()
+        configureLayout()
     }
-    
-    private func setupConstraints() {
+
+    // MARK: - Layout
+
+    private func configureLayout() {
         view.backgroundColor = .systemGroupedBackground
-        
-        headerLabel.text = "Анализ"
-        headerLabel.font = .systemFont(ofSize: 34, weight: .bold)
-        headerLabel.textColor = .black
-        headerLabel.translatesAutoresizingMaskIntoConstraints = false
-        totalAmountLabel.text = "\(String(describing: viewModel.sumOfTransactions)) \(currency.rawValue)"
-        
-        tableView.backgroundColor = .clear
-        tableView.separatorStyle = .singleLine
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "startCell")
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "endCell")
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "sortCell")
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "amountCell")
-        tableView.register(TransactionCell.self, forCellReuseIdentifier: TransactionCell.identifier)
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(headerLabel)
+
+        view.addSubview(titleLabel)
         view.addSubview(tableView)
-        
+
         NSLayoutConstraint.activate([
-            headerLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            headerLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            
-            tableView.topAnchor.constraint(equalTo: headerLabel.bottomAnchor),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+
+            tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-    
-    @objc private func dateFromChanged(_ newDate: Date) {
+
+    // MARK: - Date Handlers
+
+    @objc private func handleFromDateChange(_ newDate: Date) {
         if newDate > viewModel.endDate {
             viewModel.startDate = newDate
             viewModel.endDate = newDate
-            dateToPicker.date = newDate
+            toDatePicker.date = newDate
         } else {
             viewModel.startDate = newDate
         }
         tableView.reloadData()
     }
 
-    @objc private func dateToChanged(_ newDate: Date) {
+    @objc private func handleToDateChange(_ newDate: Date) {
         if newDate < viewModel.startDate {
             viewModel.startDate = newDate
             viewModel.endDate = newDate
-            dateFromPicker.date = newDate
+            fromDatePicker.date = newDate
         } else {
             viewModel.endDate = newDate
         }
         tableView.reloadData()
     }
-    
-//    private func showSortOptions() {
-//        let alert = UIAlertController(title: "Показывать сначала", message: nil, preferredStyle: .actionSheet)
-//        
-//        TransactionHistoryViewModel.SortOption.allCases.forEach { option in
-//            let action = UIAlertAction(title: option.rawValue, style: .default) { _ in
-//                self.sortOption = option
-//                self.viewModel.sortTransactions(by: option)
-//                self.tableView.reloadData()
-//            }
-//            alert.addAction(action)
-//        }
-//        
-//        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel))
-//        
-//        present(alert, animated: true)
-//    }
+
+    // MARK: - Cell Configurators
+
+    private func setupDateCell(_ cell: UITableViewCell, title: String, date: Date, selector: Selector) {
+        cell.textLabel?.text = title
+        cell.textLabel?.font = .systemFont(ofSize: 17)
+        cell.textLabel?.textColor = .black
+
+        let picker: CustomDatePickerView
+        switch selector {
+        case #selector(handleFromDateChange(_:)):
+            picker = fromDatePicker
+        default:
+            picker = toDatePicker
+        }
+        picker.date = date
+        picker.translatesAutoresizingMaskIntoConstraints = false
+
+        let container = UIView()
+        container.layer.cornerRadius = 6
+        container.addSubview(picker)
+        NSLayoutConstraint.activate([
+            picker.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            picker.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            picker.heightAnchor.constraint(equalToConstant: 34),
+        ])
+
+        cell.accessoryView = container
+        cell.accessoryView?.frame.size = CGSize(width: 140, height: 34)
+    }
+
+    private func setupSumCell(_ cell: UITableViewCell) {
+        cell.textLabel?.text = "Сумма"
+        cell.textLabel?.font = .systemFont(ofSize: 17)
+        cell.textLabel?.textColor = .black
+
+        sumLabel.text = "\(viewModel.sumOfTransactions) \(currency.rawValue)"
+
+        cell.contentView.addSubview(sumLabel)
+        NSLayoutConstraint.activate([
+            sumLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -16),
+            sumLabel.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
+        ])
+    }
 }
 
+// MARK: - UITableViewDataSource & UITableViewDelegate
+
 extension AnalysisViewController: UITableViewDataSource, UITableViewDelegate {
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
-    }
-    
+    func numberOfSections(in tableView: UITableView) -> Int { 2 }
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return section == 0 ? 4 : max(1, viewModel.categories.count)
+        section == 0 ? 4 : max(1, viewModel.categories.count)
     }
-    
-    func tableView(_ tableView: UITableView, heightOfRowInSection section: Int) -> Int {
-        return 60
-    }
-    
+
+    func tableView(_ tableView: UITableView, heightForRowInSection section: Int) -> Int { 60 }
+
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         view.tintColor = .systemGroupedBackground
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.section == 0 {
             switch indexPath.row {
-                
             case 0:
-                let cell = tableView.dequeueReusableCell(withIdentifier: "startCell", for: indexPath)
+                let cell = tableView.dequeueReusableCell(withIdentifier: "startDateCell", for: indexPath)
                 cell.backgroundColor = .white
                 cell.selectionStyle = .none
-                configureDateCell(cell, title: "Период: начало", date: viewModel.startDate, selector: #selector(dateFromChanged))
+                setupDateCell(cell, title: "Период: начало", date: viewModel.startDate, selector: #selector(handleFromDateChange))
                 return cell
             case 1:
-                let cell = tableView.dequeueReusableCell(withIdentifier: "startCell", for: indexPath)
+                let cell = tableView.dequeueReusableCell(withIdentifier: "endDateCell", for: indexPath)
                 cell.backgroundColor = .white
                 cell.selectionStyle = .none
-                configureDateCell(cell, title: "Период: конец", date: viewModel.endDate, selector: #selector(dateToChanged))
+                setupDateCell(cell, title: "Период: конец", date: viewModel.endDate, selector: #selector(handleToDateChange))
                 return cell
             case 2:
                 let cell = tableView.dequeueReusableCell(withIdentifier: "sortCell", for: indexPath)
                 cell.backgroundColor = .white
                 cell.selectionStyle = .none
-//                configureSortCell(cell)
+                // setupSortCell(cell) // если понадобится
                 return cell
             case 3:
                 let cell = tableView.dequeueReusableCell(withIdentifier: "amountCell", for: indexPath)
                 cell.backgroundColor = .white
                 cell.selectionStyle = .none
-                configureTotalCell(cell)
+                setupSumCell(cell)
                 return cell
             default:
-                let cell = UITableViewCell()
-                return cell
+                return UITableViewCell()
             }
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: TransactionCell.identifier, for: indexPath) as! TransactionCell
             let category = viewModel.sortedCategories[indexPath.row]
-            print(viewModel.sumOfTransactions)
-            print(viewModel.sumOfCategory(with: category.id))
-            cell.configure(with: category, amount: viewModel.sumOfTransactions, categorySum: viewModel.sumOfCategory(with: category.id))
+            cell.configure(
+                with: category,
+                amount: viewModel.sumOfTransactions,
+                categorySum: viewModel.sumOfCategory(with: category.id)
+            )
             cell.selectionStyle = .none
             return cell
         }
     }
-    
-    private func configureDateCell(_ cell: UITableViewCell, title: String, date: Date, selector: Selector) {
-        cell.textLabel?.text = title
-        cell.textLabel?.font = .systemFont(ofSize: 17)
-        cell.textLabel?.textColor = .black
-        
-        let datePicker: CustomDatePickerView
-        switch selector {
-        case #selector(dateFromChanged(_:)):
-            datePicker = dateFromPicker
-            datePicker.onDateChanged = dateFromChanged
-        default:
-            datePicker = dateToPicker
-            datePicker.onDateChanged = dateToChanged
-        }
-        datePicker.date = date
-        datePicker.translatesAutoresizingMaskIntoConstraints = false
-        
-        let container = UIView()
-        container.layer.cornerRadius = 6
-        container.addSubview(datePicker)
-        NSLayoutConstraint.activate([
-            datePicker.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            datePicker.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            datePicker.heightAnchor.constraint(equalToConstant: 34),
-        ])
-        
-        cell.accessoryView = container
-        cell.accessoryView?.frame.size = CGSize(width: 140, height: 34)
-    }
-    
-//    private func configureSortCell(_ cell: UITableViewCell) {
-//        cell.textLabel?.text = "Сортировка"
-//        cell.textLabel?.font = .systemFont(ofSize: 17)
-//        cell.textLabel?.textColor = .black
-//        
-//        let button = UIButton(type: .system)
-//        button.setTitle(sortOption.rawValue, for: .normal)
-//        button.setTitleColor(.black, for: .normal)
-//        button.titleLabel?.font = .systemFont(ofSize: 17)
-//        
-//        button.backgroundColor = .mintGreen
-//        button.layer.cornerRadius = 6
-//        button.addTarget(self, action: #selector(sortButtonTapped), for: .touchUpInside)
-//        
-//        cell.accessoryView = button
-//        cell.accessoryView?.frame.size = CGSize(width: 150, height: 34)
-//    }
-    
-    private func configureTotalCell(_ cell: UITableViewCell) {
-        cell.textLabel?.text = "Сумма"
-        cell.textLabel?.font = .systemFont(ofSize: 17)
-        cell.textLabel?.textColor = .black
 
-        totalAmountLabel.text = "\(viewModel.sumOfTransactions) \(currency.rawValue)"
-        totalAmountLabel.font = .systemFont(ofSize: 17, weight: .regular)
-        
-        cell.contentView.addSubview(totalAmountLabel)
-        totalAmountLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            totalAmountLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -16),
-            totalAmountLabel.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
-        ])
-    }
-    
-    @objc private func sortButtonTapped() {
-//        showSortOptions()
-    }
-    
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return section == 1 ? "Операции" : nil
+        section == 1 ? "Операции" : nil
     }
-    
+
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return section == 0 ? 0 : 40
+        section == 0 ? 0 : 40
     }
 }
 
 #Preview {
     AnalysisViewController(direction: .outcome)
 }
-
