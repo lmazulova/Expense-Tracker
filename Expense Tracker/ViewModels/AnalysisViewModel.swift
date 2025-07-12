@@ -51,15 +51,16 @@ final class AnalysisViewModel {
             .reduce(Decimal.zero) { $0 + $1.amount }
     }
     
-    private func sortCategories() {
+    func sortCategories() {
         //Применяем фильтрацию по выбранной категории
+        let filtered = categories.filter { sumOfCategory(with: $0.id) != 0 }
         switch selectedOrder {
         case .ascending:
-            self.sortedCategories = categories.sorted { sumOfCategory(with: $0.id) < sumOfCategory(with: $1.id) }
+            self.sortedCategories = filtered.sorted { sumOfCategory(with: $0.id) < sumOfCategory(with: $1.id) }
         case .descending:
-            self.sortedCategories = categories.sorted { sumOfCategory(with: $0.id) > sumOfCategory(with: $1.id) }
+            self.sortedCategories = filtered.sorted { sumOfCategory(with: $0.id) > sumOfCategory(with: $1.id) }
         case .none:
-            self.sortedCategories = categories
+            self.sortedCategories = filtered
         }
     }
 }

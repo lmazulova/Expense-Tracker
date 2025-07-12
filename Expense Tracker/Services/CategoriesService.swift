@@ -43,6 +43,30 @@ actor CategoriesService {
             name: "Кэшбек",
             emoji: "💸",
             direction: .income
+        ),
+        Category(
+            id: 8,
+            name: "Продукты",
+            emoji: "🛒",
+            direction: .outcome
+        ),
+        Category(
+            id: 9,
+            name: "Дом",
+            emoji: "🏠",
+            direction: .outcome
+        ),
+        Category(
+            id: 10,
+            name: "Подарки",
+            emoji: "🎁",
+            direction: .outcome
+        ),
+        Category(
+            id: 11,
+            name: "Связь",
+            emoji: "📱",
+            direction: .outcome
         )
     ]
     

@@ -104,6 +104,7 @@ class AnalysisViewController: UIViewController {
         } else {
             viewModel.startDate = newDate
         }
+        viewModel.sortCategories()
         tableView.reloadData()
     }
 
@@ -115,6 +116,7 @@ class AnalysisViewController: UIViewController {
         } else {
             viewModel.endDate = newDate
         }
+        viewModel.sortCategories()
         tableView.reloadData()
     }
 
@@ -169,7 +171,7 @@ extension AnalysisViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int { 2 }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        section == 0 ? 4 : max(1, viewModel.categories.count)
+        section == 0 ? 4 : max(0, viewModel.sortedCategories.count)
     }
 
     func tableView(_ tableView: UITableView, heightForRowInSection section: Int) -> Int { 60 }
