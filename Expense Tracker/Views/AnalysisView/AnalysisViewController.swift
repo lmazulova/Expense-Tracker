@@ -27,7 +27,6 @@ class AnalysisViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupConstraints()
-        updateTotalAmount()
     }
     
     private func setupConstraints() {
@@ -37,6 +36,7 @@ class AnalysisViewController: UIViewController {
         headerLabel.font = .systemFont(ofSize: 34, weight: .bold)
         headerLabel.textColor = .black
         headerLabel.translatesAutoresizingMaskIntoConstraints = false
+        totalAmountLabel.text = "\(String(describing: viewModel.sumOfTransactions)) \(currency.rawValue)"
         
         tableView.backgroundColor = .clear
         tableView.separatorStyle = .singleLine
@@ -63,25 +63,25 @@ class AnalysisViewController: UIViewController {
         ])
     }
     
-    private func updateTotalAmount() {
-        totalAmountLabel.text = "\(String(describing: viewModel.sumOfTransactions)) \(currency.rawValue)"
-    }
-    
     @objc private func dateFromChanged(_ newDate: Date) {
         if newDate > viewModel.endDate {
+            viewModel.startDate = newDate
             viewModel.endDate = newDate
             dateToPicker.date = newDate
+        } else {
+            viewModel.startDate = newDate
         }
-        viewModel.endDate = newDate
         tableView.reloadData()
     }
-    
+
     @objc private func dateToChanged(_ newDate: Date) {
         if newDate < viewModel.startDate {
             viewModel.startDate = newDate
+            viewModel.endDate = newDate
             dateFromPicker.date = newDate
+        } else {
+            viewModel.endDate = newDate
         }
-        viewModel.startDate = newDate
         tableView.reloadData()
     }
     
@@ -155,7 +155,9 @@ extension AnalysisViewController: UITableViewDataSource, UITableViewDelegate {
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: TransactionCell.identifier, for: indexPath) as! TransactionCell
             let category = viewModel.sortedCategories[indexPath.row]
-            cell.configure(with: category, amount: viewModel.sumOfTransactions)
+            print(viewModel.sumOfTransactions)
+            print(viewModel.sumOfCategory(with: category.id))
+            cell.configure(with: category, amount: viewModel.sumOfTransactions, categorySum: viewModel.sumOfCategory(with: category.id))
             cell.selectionStyle = .none
             return cell
         }

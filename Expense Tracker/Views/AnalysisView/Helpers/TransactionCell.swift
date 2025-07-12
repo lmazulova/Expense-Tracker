@@ -80,18 +80,23 @@ final class TransactionCell: UITableViewCell {
     }
     
     func configure(with category: Category, amount: Decimal?, categorySum: Decimal? = nil) {
-        if let amount = amount, let categorySum = categorySum, amount > 0 {
+        if let amount = amount, let categorySum = categorySum, abs(amount) > 0 {
             let percentageDecimal = categorySum / amount * 100
-            let percentage = NSDecimalNumber(decimal: percentageDecimal).rounding(accordingToBehavior: nil)
+            let percentage = NSDecimalNumber(decimal: abs(percentageDecimal)).rounding(accordingToBehavior: nil)
             percentageLabel.text = "\(percentage)%"
         } else {
-            percentageLabel.text = nil
+            percentageLabel.text = "0%"
         }
         
         let currency = BankAccountManager().account.currency
         
         categoryLabel.text = category.name
-        amountLabel.text = "\(String(describing: categorySum)) \(currency.rawValue)"
+        
+        if let categorySum = categorySum {
+            amountLabel.text = "\(String(describing: categorySum)) \(currency.rawValue)"
+        } else {
+            amountLabel.text = "0 \(currency.rawValue)"
+        }
         emojiLabel.text = String(category.emoji)
     }
 }
