@@ -1,7 +1,7 @@
 import Foundation
 
-enum SortingOrder: CaseIterable {
-    case ascending
-    case descending
+enum SortingOrder: String, CaseIterable {
+    case ascending = "По возрастанию"
+    case descending = "По убыванию"
     case none
 }

@@ -4,6 +4,7 @@ import OSLog
 struct HistoryView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel: HistoryViewModel
+    @State var showAnalysisView: Bool = false
     
     private let log = OSLog(
         subsystem: "ru.lmazulova.Expense-Tracker",
@@ -47,7 +48,7 @@ struct HistoryView: View {
                 BackButton(action: {dismiss()})
             }
             ToolbarItem(placement: .topBarTrailing) {
-                Button(action: {}) {
+                Button(action: { showAnalysisView = true }) {
                     Image("analyseButton")
                         .foregroundStyle(Color.violet)
                 }
@@ -77,6 +78,10 @@ struct HistoryView: View {
         )
         .task {
             await viewModel.loadTransactions()
+        }
+        .fullScreenCover(isPresented: $showAnalysisView) {
+            AnalysisView(direction: viewModel.direction)
+                .ignoresSafeArea()
         }
     }
     

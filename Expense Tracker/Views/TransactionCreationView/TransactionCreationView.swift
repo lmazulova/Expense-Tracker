@@ -55,7 +55,7 @@ struct TransactionCreationView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Сохранить") {
+                    Button(viewModel.isEditMode ? "Сохранить" : "Создать") {
                         if isDoneButtonDisabled {
                             showAlert = true
                             return
