@@ -1,7 +1,7 @@
 import Foundation
 import os.log
 
-struct Transaction: Hashable, Identifiable {
+struct Transaction: Hashable {
     let id: Int
     let account: BankAccountShort
     let category: Category

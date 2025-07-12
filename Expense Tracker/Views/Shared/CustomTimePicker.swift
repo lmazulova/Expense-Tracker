@@ -1,19 +1,12 @@
-//
-//  DatePickerButton.swift
-//  Expense Tracker
-//
-//  Created by user on 20.06.2025.
-//
-
 import SwiftUI
 
-struct CustomDatePicker: View {
-    @Binding var selectedDate: Date
+struct CustomTimePicker: View {
+    @Binding var selectedTime: Date
     @State var textWidth: CGFloat = 0
     
     var body: some View {
         ZStack {
-            Text(selectedDate.formattedRu())
+            Text(selectedTime.formatted(date: .omitted, time: .shortened))
                 .padding(.horizontal, 11)
                 .padding(.vertical, 6)
                 .background(
@@ -31,11 +24,22 @@ struct CustomDatePicker: View {
                 .foregroundColor(.black)
             
             // кладем datePicker под визуальное отображение с помощью модификатора blendMode, но выше в стэке, так он остается кликабельным и при этом не виден на экране
-            DatePicker("", selection: $selectedDate, in: ...Date(), displayedComponents: .date)
+            DatePicker("", selection: $selectedTime, displayedComponents: .hourAndMinute)
                 .labelsHidden()
                 .blendMode(.destinationOver)
                 .allowsHitTesting(true)
                 .frame(width: textWidth)
         }
     }
+}
+
+
+#Preview {
+    struct PreviewWrapper: View {
+        @State var time = Date()
+        var body: some View {
+            CustomTimePicker(selectedTime: $time)
+        }
+    }
+    return PreviewWrapper()
 }

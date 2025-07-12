@@ -2,7 +2,11 @@ import Foundation
 
 @Observable
 final class TransactionsService {
-
+    static let shared: TransactionsService = TransactionsService()
+    
+    private init() {
+    }
+    
     private(set) var allTransactions: Set<Transaction> = [
         Transaction(
             id: 1,
@@ -13,7 +17,7 @@ final class TransactionsService {
                 currency: .rub
             ),
             category: Category(
-                id: 1,
+                id: 2,
                 name: "Зарплата",
                 emoji: "💰",
                 direction: .income
@@ -33,7 +37,7 @@ final class TransactionsService {
                 currency: .rub
             ),
             category: Category(
-                id: 1,
+                id: 5,
                 name: "Подработка",
                 emoji: "💵",
                 direction: .income
@@ -53,7 +57,7 @@ final class TransactionsService {
                 currency: .rub
             ),
             category: Category(
-                id: 1,
+                id: 2,
                 name: "Зарплата",
                 emoji: "💰",
                 direction: .income
@@ -73,7 +77,7 @@ final class TransactionsService {
                 currency: .rub
             ),
             category: Category(
-                id: 1,
+                id: 2,
                 name: "Зарплата",
                 emoji: "💰",
                 direction: .income
@@ -93,7 +97,7 @@ final class TransactionsService {
                 currency: .rub
             ),
             category: Category(
-                id: 1,
+                id: 2,
                 name: "Зарплата",
                 emoji: "💰",
                 direction: .income
@@ -113,9 +117,9 @@ final class TransactionsService {
                 currency: .rub
             ),
             category: Category(
-                id: 1,
-                name: "Зарплата",
-                emoji: "💰",
+                id: 7,
+                name: "Кэшбек",
+                emoji: "💸",
                 direction: .income
             ),
             amount: Decimal(string: "250.00")!,
@@ -133,7 +137,7 @@ final class TransactionsService {
                 currency: .rub
             ),
             category: Category(
-                id: 2,
+                id: 8,
                 name: "Продукты",
                 emoji: "🛒",
                 direction: .outcome
@@ -153,9 +157,9 @@ final class TransactionsService {
                 currency: .rub
             ),
             category: Category(
-                id: 3,
-                name: "Кафе",
-                emoji: "☕️",
+                id: 1,
+                name: "Еда",
+                emoji: "🍔",
                 direction: .outcome
             ),
             amount: Decimal(string: "-120.00")!,
@@ -173,9 +177,9 @@ final class TransactionsService {
                 currency: .rub
             ),
             category: Category(
-                id: 4,
+                id: 3,
                 name: "Транспорт",
-                emoji: "🚇",
+                emoji: "🚌",
                 direction: .outcome
             ),
             amount: Decimal(string: "-50.00")!,
@@ -193,8 +197,8 @@ final class TransactionsService {
                 currency: .rub
             ),
             category: Category(
-                id: 5,
-                name: "Аптека",
+                id: 4,
+                name: "Медицина ",
                 emoji: "💊",
                 direction: .outcome
             ),
@@ -215,7 +219,7 @@ final class TransactionsService {
             category: Category(
                 id: 6,
                 name: "Развлечения",
-                emoji: "🎬",
+                emoji: "💃",
                 direction: .outcome
             ),
             amount: Decimal(string: "-150.00")!,
@@ -233,7 +237,7 @@ final class TransactionsService {
                 currency: .rub
             ),
             category: Category(
-                id: 7,
+                id: 9,
                 name: "Дом",
                 emoji: "🏠",
                 direction: .outcome
@@ -253,7 +257,7 @@ final class TransactionsService {
                 currency: .rub
             ),
             category: Category(
-                id: 8,
+                id: 10,
                 name: "Подарки",
                 emoji: "🎁",
                 direction: .outcome
@@ -267,7 +271,12 @@ final class TransactionsService {
         Transaction(
             id: 13,
             account: BankAccountShort(id: 100, name: "Основной счет", balance: 200.00, currency: .rub),
-            category: Category(id: 9, name: "Книги", emoji: "📚", direction: .outcome),
+            category: Category(
+                id: 9,
+                name: "Дом",
+                emoji: "🏠",
+                direction: .outcome
+            ),
             amount: Decimal(string: "-80.00")!,
             transactionDate: Date(), // today
             comment: "Покупка книги",
@@ -277,7 +286,12 @@ final class TransactionsService {
         Transaction(
             id: 14,
             account: BankAccountShort(id: 100, name: "Основной счет", balance: 120.00, currency: .rub),
-            category: Category(id: 10, name: "Такси", emoji: "🚕", direction: .outcome),
+            category: Category(
+                id: 3,
+                name: "Транспорт",
+                emoji: "🚌",
+                direction: .outcome
+            ),
             amount: Decimal(string: "-150.00")!,
             transactionDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!,
             comment: "Поездка на такси",
@@ -287,7 +301,12 @@ final class TransactionsService {
         Transaction(
             id: 15,
             account: BankAccountShort(id: 100, name: "Основной счет", balance: 70.00, currency: .rub),
-            category: Category(id: 11, name: "Одежда", emoji: "👗", direction: .outcome),
+            category: Category(
+                id: 10,
+                name: "Подарки",
+                emoji: "🎁",
+                direction: .outcome
+            ),
             amount: Decimal(string: "-300.00")!,
             transactionDate: Calendar.current.date(byAdding: .day, value: -7, to: Date())!,
             comment: "Покупка футболки",
@@ -297,7 +316,12 @@ final class TransactionsService {
         Transaction(
             id: 16,
             account: BankAccountShort(id: 100, name: "Основной счет", balance: 50.00, currency: .rub),
-            category: Category(id: 12, name: "Косметика", emoji: "💄", direction: .outcome),
+            category: Category(
+                id: 10,
+                name: "Подарки",
+                emoji: "🎁",
+                direction: .outcome
+            ),
             amount: Decimal(string: "-60.00")!,
             transactionDate: Date(),
             comment: "Крем для лица",
@@ -307,7 +331,12 @@ final class TransactionsService {
         Transaction(
             id: 17,
             account: BankAccountShort(id: 100, name: "Основной счет", balance: 30.00, currency: .rub),
-            category: Category(id: 13, name: "Связь", emoji: "📱", direction: .outcome),
+            category: Category(
+                id: 11,
+                name: "Связь",
+                emoji: "📱",
+                direction: .outcome
+            ),
             amount: Decimal(string: "-20.00")!,
             transactionDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!,
             comment: "Оплата мобильной связи",

@@ -10,3 +10,4 @@ struct Category: Hashable, Identifiable, Sendable {
     let emoji: Character
     let direction: Direction
 }
+

@@ -1,10 +1,5 @@
 //
 //  BankAccountManager.swift
-//  Expense Tracker
-//
-//  Created by user on 26.06.2025.
-//
-
 import Foundation
 
 protocol BankAccountStorage {
@@ -20,7 +15,7 @@ final class BankAccountManager {
     
     private(set) var account: BankAccountShort
     
-    init(transactionService: TransactionsService = TransactionsService(), storage: BankAccountStorage = UserDefaultsBankAccountStorage()) {
+    init(transactionService: TransactionsService = TransactionsService.shared, storage: BankAccountStorage = UserDefaultsBankAccountStorage()) {
         self.transactionService = transactionService
         self.storage = storage
         
