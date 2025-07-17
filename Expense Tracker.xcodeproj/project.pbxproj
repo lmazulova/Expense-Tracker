@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		CE1EC6152E16AB94009310D4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CE1EC60F2E16AB94009310D4 /* Assets.xcassets */; };
+		CECC9A712E269F1C00461384 /* SwiftKeychainWrapper in Frameworks */ = {isa = PBXBuildFile; productRef = CECC9A702E269F1C00461384 /* SwiftKeychainWrapper */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +45,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CECC9A712E269F1C00461384 /* SwiftKeychainWrapper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,6 +98,7 @@
 			);
 			name = "Expense Tracker";
 			packageProductDependencies = (
+				CECC9A702E269F1C00461384 /* SwiftKeychainWrapper */,
 			);
 			productName = "Expense Tracker";
 			productReference = CEB745BF2DF8B03800DADFC6 /* Expense Tracker.app */;
@@ -152,6 +155,9 @@
 			);
 			mainGroup = CEB745B62DF8B03700DADFC6;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				CECC9A6F2E269F1C00461384 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CEB745C02DF8B03800DADFC6 /* Products */;
 			projectDirPath = "";
@@ -451,6 +457,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CECC9A6F2E269F1C00461384 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jrendel/SwiftKeychainWrapper";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CECC9A702E269F1C00461384 /* SwiftKeychainWrapper */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CECC9A6F2E269F1C00461384 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */;
+			productName = SwiftKeychainWrapper;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CEB745B72DF8B03700DADFC6 /* Project object */;
 }

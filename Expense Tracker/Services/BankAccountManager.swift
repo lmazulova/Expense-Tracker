@@ -3,8 +3,8 @@
 import Foundation
 
 protocol BankAccountStorage {
-    func saveAccount(_ account: BankAccountShort)
-    func loadAccount() -> BankAccountShort?
+    func saveAccount(_ account: BankAccount)
+    func loadAccount() -> BankAccount?
 }
 
 @Observable
@@ -13,7 +13,7 @@ final class BankAccountManager {
     private let transactionService: TransactionsService
     private let storage: BankAccountStorage
     
-    private(set) var account: BankAccountShort
+    private(set) var account: BankAccount
     
     init(transactionService: TransactionsService = TransactionsService.shared, storage: BankAccountStorage = UserDefaultsBankAccountStorage()) {
         self.transactionService = transactionService
@@ -22,7 +22,7 @@ final class BankAccountManager {
         if let loadedAccount = storage.loadAccount() {
             self.account = loadedAccount
         } else {
-            let newAccount = BankAccountShort(
+            let newAccount = BankAccount (
                 id: 1,
                 name: "Основной счет",
                 balance: transactionService.allTransactions.reduce(Decimal(0)) { $0 + $1.amount },
@@ -34,7 +34,7 @@ final class BankAccountManager {
     }
     
     func updateCurrency(_ newCurrency: Currency) {
-        let newAccount = BankAccountShort(
+        let newAccount = BankAccount(
             id: account.id,
             name: account.name,
             balance: account.balance,
@@ -45,7 +45,7 @@ final class BankAccountManager {
     }
     
     func updateBalance(_ newBalance: Decimal) {
-        let newAccount = BankAccountShort(
+        let newAccount = BankAccount(
             id: account.id,
             name: account.name,
             balance: newBalance,

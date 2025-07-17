@@ -1,9 +1,9 @@
 import Foundation
 import os.log
 
-struct Transaction: Hashable {
+struct Transaction: Hashable, Decodable {
     let id: Int
-    let account: BankAccountShort
+    let account: BankAccount
     let category: Category
     let amount: Decimal
     let transactionDate: Date
@@ -12,6 +12,9 @@ struct Transaction: Hashable {
     let updatedAt: Date
 }
 
+//extension Transaction: Decodable {
+//    
+//}
 
 // MARK: - Конвертирование Transaction в json object и обратно
 extension Transaction {
@@ -91,7 +94,7 @@ extension Transaction {
         
         return Transaction(
             id: id,
-            account: BankAccountShort(id: accountId, name: accountName, balance: accountBalance, currency: accountCurrency),
+            account: BankAccount(id: accountId, name: accountName, balance: accountBalance, currency: accountCurrency),
             category: Category(id: categoryId, name: categoryName, emoji: categoryEmoji, direction: categoryIsIncome ? .income : .outcome),
             amount: amount,
             transactionDate: transactionDate,
@@ -192,7 +195,7 @@ extension Transaction {
         }
         return Transaction(
             id: id,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: accountId,
                 name: components[2],
                 balance: accountBalance,

@@ -10,7 +10,7 @@ final class TransactionsService {
     private(set) var allTransactions: Set<Transaction> = [
         Transaction(
             id: 1,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: 1,
                 name: "Основной счет",
                 balance: 1000.00,
@@ -30,7 +30,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 140,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: 1,
                 name: "Основной счет",
                 balance: 1300.50,
@@ -50,7 +50,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 2,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: 1,
                 name: "Основной счет",
                 balance: 1000.00,
@@ -70,7 +70,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 3,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: 1,
                 name: "Основной счет",
                 balance: 1000.00,
@@ -90,7 +90,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 4,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: 1,
                 name: "Основной счет",
                 balance: 1000.00,
@@ -110,7 +110,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 5,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: 1,
                 name: "Основной счет",
                 balance: 1000.00,
@@ -130,7 +130,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 6,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: 1,
                 name: "Основной счет",
                 balance: 800.00,
@@ -150,7 +150,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 7,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: 1,
                 name: "Основной счет",
                 balance: 600.00,
@@ -170,7 +170,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 8,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: 1,
                 name: "Основной счет",
                 balance: 500.00,
@@ -190,7 +190,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 9,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: 1,
                 name: "Основной счет",
                 balance: 450.00,
@@ -210,7 +210,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 10,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: 1,
                 name: "Основной счет",
                 balance: 400.00,
@@ -230,7 +230,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 11,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: 1,
                 name: "Основной счет",
                 balance: 300.00,
@@ -250,7 +250,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 12,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: 1,
                 name: "Основной счет",
                 balance: 250.00,
@@ -270,7 +270,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 13,
-            account: BankAccountShort(id: 100, name: "Основной счет", balance: 200.00, currency: .rub),
+            account: BankAccount(id: 100, name: "Основной счет", balance: 200.00, currency: .rub),
             category: Category(
                 id: 9,
                 name: "Дом",
@@ -285,7 +285,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 14,
-            account: BankAccountShort(id: 100, name: "Основной счет", balance: 120.00, currency: .rub),
+            account: BankAccount(id: 100, name: "Основной счет", balance: 120.00, currency: .rub),
             category: Category(
                 id: 3,
                 name: "Транспорт",
@@ -300,7 +300,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 15,
-            account: BankAccountShort(id: 100, name: "Основной счет", balance: 70.00, currency: .rub),
+            account: BankAccount(id: 100, name: "Основной счет", balance: 70.00, currency: .rub),
             category: Category(
                 id: 10,
                 name: "Подарки",
@@ -315,7 +315,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 16,
-            account: BankAccountShort(id: 100, name: "Основной счет", balance: 50.00, currency: .rub),
+            account: BankAccount(id: 100, name: "Основной счет", balance: 50.00, currency: .rub),
             category: Category(
                 id: 10,
                 name: "Подарки",
@@ -330,7 +330,7 @@ final class TransactionsService {
         ),
         Transaction(
             id: 17,
-            account: BankAccountShort(id: 100, name: "Основной счет", balance: 30.00, currency: .rub),
+            account: BankAccount(id: 100, name: "Основной счет", balance: 30.00, currency: .rub),
             category: Category(
                 id: 11,
                 name: "Связь",

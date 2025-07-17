@@ -10,7 +10,7 @@ import Foundation
 final class UserDefaultsBankAccountStorage: BankAccountStorage {
     private let key = "bankAccount"
     
-    func saveAccount(_ account: BankAccountShort) {
+    func saveAccount(_ account: BankAccount) {
         do {
             let data = try JSONEncoder().encode(account)
             UserDefaults.standard.set(data, forKey: key)
@@ -20,11 +20,11 @@ final class UserDefaultsBankAccountStorage: BankAccountStorage {
         }
     }
     
-    func loadAccount() -> BankAccountShort? {
+    func loadAccount() -> BankAccount? {
         guard let data = UserDefaults.standard.data(forKey: key) else {
             return nil
         }
-        return try? JSONDecoder().decode(BankAccountShort.self, from: data)
+        return try? JSONDecoder().decode(BankAccount.self, from: data)
     }
 }
 
