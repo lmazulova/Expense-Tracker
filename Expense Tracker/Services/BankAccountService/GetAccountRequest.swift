@@ -8,7 +8,7 @@
 import Foundation
 
 struct GetAccountRequest: NetworkRequest {
-    typealias Response = BankAccount
+    typealias Response = [BankAccount]
     
     var path: String {"/accounts"}
     var method: String {"GET"}

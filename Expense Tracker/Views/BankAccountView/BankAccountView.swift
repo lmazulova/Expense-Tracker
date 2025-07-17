@@ -32,7 +32,8 @@ struct BankAccountView: View {
                     .foregroundColor(.violet)
             }
         }
-        .onAppear {
+        .task {
+            await viewModel.loadAccount()
             balanceText = viewModel.balance.formattedWithLocale()
         }
         .onShake {
@@ -43,7 +44,8 @@ struct BankAccountView: View {
         }
         .if(!viewModel.isEditMode) { view in
             view.refreshable {
-                await viewModel.requestForUpdate()
+                await viewModel.loadAccount()
+                balanceText = viewModel.balance.formattedWithLocale()
             }
         }
         .popover(isPresented: $showPopup) {
