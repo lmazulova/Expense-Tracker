@@ -4,6 +4,14 @@ enum Currency: String, CaseIterable {
     case rub = "₽"
     case usd = "$"
     case eur = "€"
+    
+    var serverCode: String {
+        switch self {
+        case .rub: return "RUB"
+        case .usd: return "USD"
+        case .eur: return "EUR"
+        }
+    }
 }
 
 extension Currency: Codable {

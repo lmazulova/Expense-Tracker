@@ -12,17 +12,7 @@ import SwiftUI
 final class BankAccountViewModel {
     let bankAccountService: BankAccountService
     var isEditMode: Bool = false
-    var bankAccountManager: BankAccountManager = BankAccountManager()
-    var currency: Currency = .rub {
-        didSet {
-            bankAccountManager.updateCurrency(currency)
-        }
-    }
-    private(set) var balance: Decimal = 0 {
-        didSet {
-            bankAccountManager.updateBalance(balance)
-        }
-    }
+    private(set) var account: BankAccount?
     
     init(bankAccountService: BankAccountService = BankAccountService()) {
         self.bankAccountService = bankAccountService
@@ -31,29 +21,26 @@ final class BankAccountViewModel {
     func toggleEditMode() {
         withAnimation {
             isEditMode.toggle()
-            if !isEditMode {
-                // При выходе из режима редактирования обновляем текст
-                
-            } else {
-//                initialBalanceText = balanceText
-            }
         }
     }
+    
     func loadAccount() async {
         do {
             let account = try await bankAccountService.currentAccount()
-            self.balance = account.balance
-            self.currency = account.currency
+            self.account = account
         } catch {
             print("Ошибка при загрузке акаунта: \(error)")
         }
     }
     
-    func requestForUpdate() async {
-        await bankAccountManager.requestForUpdate()
-    }
-    
-    func setBalance(balance: Decimal) {
-        self.balance = balance
+    func updateAccount(balance: Decimal, currency: Currency) async {
+        guard var account = account else { return }
+        account = BankAccount(id: account.id, name: account.name, balance: balance, currency: currency)
+        do {
+            let result = try await bankAccountService.updateAccount(account)
+            self.account = result
+        } catch {
+            print("Ошибка при обновлении аккаунта: \(error)")
+        }
     }
 }

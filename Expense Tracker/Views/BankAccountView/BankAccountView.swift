@@ -4,7 +4,9 @@ struct BankAccountView: View {
     @State private var showPopup: Bool = false
     @State var isSpoilerOn: Bool = false
     @State var viewModel: BankAccountViewModel = BankAccountViewModel()
-    @State var balanceText: String = ""
+    //Переменные для режима редактирования, обновление аккаунта происходит при нажатии на кнопку сохранения
+    @State var editBalanceText: String = ""
+    @State var editCurrency: Currency = .rub
     @FocusState private var textFieldIsFocused: Bool
     
     var body: some View {
@@ -15,15 +17,25 @@ struct BankAccountView: View {
         .padding(16)
         .frame(maxHeight: .infinity, alignment: .top)
         .toolbar {
-            Button(action: {
+            Button(
+                action: {
                 isSpoilerOn = false
                 checkLastDigit()
                 if viewModel.isEditMode {
-                    if let value = balanceText.decimalFromLocalizedString() {
-                        viewModel.setBalance(balance: value)
+                    if viewModel.account?.balance != editBalanceText
+                        .decimalFromLocalizedString() || viewModel.account?.currency != editCurrency {
+                        Task {
+                            await viewModel.updateAccount(
+                                balance: editBalanceText.decimalFromLocalizedString() ?? 0,
+                                currency: editCurrency
+                            )
+                        }
                     }
                 } else {
-                    balanceText = viewModel.balance.formattedWithLocale()
+                    if let account = viewModel.account {
+                        editBalanceText = account.balance.formattedWithLocale()
+                        editCurrency = account.currency
+                    }
                 }
                 viewModel.toggleEditMode()
             }) {
@@ -34,7 +46,8 @@ struct BankAccountView: View {
         }
         .task {
             await viewModel.loadAccount()
-            balanceText = viewModel.balance.formattedWithLocale()
+            editBalanceText = viewModel.account?.balance.formattedWithLocale() ?? "0"
+            editCurrency = viewModel.account?.currency ?? .rub
         }
         .onShake {
             isSpoilerOn.toggle()
@@ -45,11 +58,10 @@ struct BankAccountView: View {
         .if(!viewModel.isEditMode) { view in
             view.refreshable {
                 await viewModel.loadAccount()
-                balanceText = viewModel.balance.formattedWithLocale()
             }
         }
         .popover(isPresented: $showPopup) {
-            CurrencyPickerView(currency: $viewModel.currency)
+            CurrencyPickerView(currency: $editCurrency)
                 .padding(.horizontal, 12.5)
                 .presentationDetents([.height(350)])
                 .presentationBackground(.clear)
@@ -69,24 +81,24 @@ struct BankAccountView: View {
             Spacer()
             
             if !viewModel.isEditMode {
-                Text(balanceText)
+                Text(viewModel.account?.balance.formattedWithLocale() ?? "0")
                     .font(.system(size: 17, weight: .regular))
                     .foregroundColor(.black)
                     .spoiler(isOn: $isSpoilerOn)
                 
-                Text(" \(viewModel.currency.rawValue)")
+                Text(" \(viewModel.account?.currency.rawValue ?? "₽")")
                     .font(.system(size: 17, weight: .regular))
                     .foregroundColor(.black)
             } else {
-                TextField("Введите баланс", text: $balanceText)
+                TextField("Введите баланс", text: $editBalanceText)
                     .font(.system(size: 17, weight: .regular))
                     .focused($textFieldIsFocused)
                     .foregroundColor(textFieldIsFocused ? .black : .textGray)
                     .keyboardType(.decimalPad)
                     .multilineTextAlignment(.trailing)
                     .fixedSize()
-                    .onChange(of: balanceText) { _, newValue in
-                        balanceText = DecimalInputFormatter.filterInput(input: newValue )
+                    .onChange(of: editBalanceText) { _, newValue in
+                        editBalanceText = DecimalInputFormatter.filterInput(input: newValue )
                     }
                     .onChange(of: textFieldIsFocused) {
                         checkLastDigit()
@@ -109,7 +121,7 @@ struct BankAccountView: View {
             Spacer()
             
             Button(action: { showPopup = true }) {
-                Text("\(viewModel.currency.rawValue)")
+                Text("\(viewModel.isEditMode ? editCurrency.rawValue : (viewModel.account?.currency.rawValue ?? "₽"))")
                     .font(.system(size: 17, weight: .regular))
                     .foregroundColor(viewModel.isEditMode ? .textGray : .black)
             }
@@ -124,8 +136,8 @@ struct BankAccountView: View {
     
     //Проверка, что последний введенный символ не является разделителем
     private func checkLastDigit() {
-        if let lastDigit = balanceText.last, lastDigit == "." || lastDigit == "," {
-            balanceText = String(balanceText.dropLast())
+        if let lastDigit = editBalanceText.last, lastDigit == "." || lastDigit == "," {
+            editBalanceText = String(editBalanceText.dropLast())
         }
     }
 }

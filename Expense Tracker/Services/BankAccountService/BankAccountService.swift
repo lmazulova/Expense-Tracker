@@ -15,7 +15,7 @@ actor BankAccountService {
         return account
     }
     
-    func updateAccount(_ updated: BankAccount) async throws {
-//        self.account = updated
+    func updateAccount(_ updated: BankAccount) async throws -> BankAccount {
+        try await networkClient.send(UpdateAccountRequest(account: updated))
     }
 }

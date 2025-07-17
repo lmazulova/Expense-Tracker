@@ -9,10 +9,28 @@ import Foundation
 
 struct UpdateAccountRequest: NetworkRequest {
     typealias Response = BankAccount
+    var account: BankAccount
     
-    var path: String { "/accounts" }
+    init(account: BankAccount) {
+        self.account = account
+    }
+    
+    var path: String { "/accounts/\(account.id)" }
     var method: String { "PUT" }
-    var headers: [String : String]
-    var queryItems: [URLQueryItem]
-    var body: Data?
+    var headers: [String : String] { [:] }
+    var queryItems: [URLQueryItem] { [] }
+    var body: Data? {
+        let updateBody = UpdateAccountBody(
+            name: account.name,
+            balance: String(describing: account.balance),
+            currency: account.currency.serverCode
+        )
+        return try? JSONEncoder().encode(updateBody)
+    }
+}
+
+struct UpdateAccountBody: Codable {
+    let name: String
+    let balance: String
+    let currency: String
 }
