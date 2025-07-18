@@ -2,19 +2,19 @@
 import SwiftUI
 
 final class AnalysisViewModel {
+    var onDataChanged: (() -> Void)?
     var categories: [Category] = []
     var sortedCategories: [Category] = []
+    var filteredTransactions: [Transaction] = []
     var sumOfTransactions: Decimal {
-        return transactionService.allTransactions
-            .filter { $0.transactionDate >= startDate && $0.transactionDate <= endDate }
-            .filter { $0.category.direction == direction}
+        return filteredTransactions
             .reduce(Decimal.zero) { $0 + $1.amount }
     }
     var startDate: Date
     var endDate: Date 
     var direction: Direction
     var currency: Currency
-    private var transactionService: TransactionsService
+    private var transactionsService: TransactionsService
     private(set) var selectedOrder: SortingOrder = .none
     private var categoriesService: CategoriesService
     
@@ -28,32 +28,39 @@ final class AnalysisViewModel {
         self.endDate = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date()
         self.categoriesService = categoriesService
         self.direction = direction
-        self.transactionService = transactionService
+        self.transactionsService = transactionService
         self.currency = transactionService.currency
-        Task {
-            await loadCategories()
-        }
     }
     
     func loadCategories() async {
-        Task {
-            do {
-                await categories = try categoriesService.categories(with: direction)
-                sortCategories()
-            } catch {
-                
-            }
+        do {
+            await loadTransactions()
+            await categories = try categoriesService.categories(with: direction)
+            sortCategories()
+        } catch {
+            print("Ошибка загрузки транзакций")
+        }
+        DispatchQueue.main.async { [weak self] in
+            self?.onDataChanged?()
         }
     }
-    
+    private func loadTransactions() async {
+        do {
+            filteredTransactions = try await transactionsService.getTransactions(from: startDate, to: endDate)
+                .filter{ $0.category.direction == direction }
+        }
+        catch {
+            print(error.localizedDescription)
+            filteredTransactions = []
+        }
+    }
     func setFilters(order: SortingOrder) {
         selectedOrder = order
     }
     
     func sumOfCategory(with id: Int) -> Decimal {
-        return transactionService.allTransactions
-            .filter { $0.transactionDate >= startDate && $0.transactionDate <= endDate }
-            .filter { $0.category.direction == direction && $0.category.id == id }
+        return filteredTransactions
+            .filter { $0.category.id == id }
             .reduce(Decimal.zero) { $0 + $1.amount }
     }
     

@@ -5,7 +5,6 @@ class AnalysisViewController: UIViewController {
     // MARK: - Properties
 
     private let direction: Direction
-//    private let currency: Currency = BankAccountManager().account.currency
     private var viewModel: AnalysisViewModel
     private var sortingOrder: SortingOrder
 
@@ -66,6 +65,12 @@ class AnalysisViewController: UIViewController {
         )
         self.sortingOrder = viewModel.selectedOrder
         super.init(nibName: nil, bundle: nil)
+        viewModel.onDataChanged = { [weak self] in
+            self?.tableView.reloadData()
+        }
+        Task {
+            await viewModel.loadCategories()
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -108,8 +113,9 @@ class AnalysisViewController: UIViewController {
         } else {
             viewModel.startDate = newDate
         }
-        viewModel.sortCategories()
-        tableView.reloadData()
+        Task {
+            await viewModel.loadCategories()
+        }
     }
 
     @objc private func handleToDateChange(_ newDate: Date) {
@@ -120,8 +126,9 @@ class AnalysisViewController: UIViewController {
         } else {
             viewModel.endDate = newDate
         }
-        viewModel.sortCategories()
-        tableView.reloadData()
+        Task {
+            await viewModel.loadCategories()
+        }
     }
 
     // MARK: - Cell Configurators

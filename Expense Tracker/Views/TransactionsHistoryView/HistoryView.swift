@@ -133,6 +133,6 @@ struct HistoryView: View {
 }
 
 #Preview {
-//    HistoryView(transactionService: TransactionsService(), direction: .income)
+//    HistoryView(transactionsService: TransactionsService(), direction: .income)
 }
 
