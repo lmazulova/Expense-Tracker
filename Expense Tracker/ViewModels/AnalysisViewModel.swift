@@ -19,9 +19,9 @@ final class AnalysisViewModel {
     private var categoriesService: CategoriesService
     
     init(
-        categoriesService: CategoriesService = CategoriesService(),
+        categoriesService: CategoriesService,
         direction: Direction,
-        transactionService: TransactionsService = TransactionsService()
+        transactionService: TransactionsService
     ) {
         let initialStartDate = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
         self.startDate = Calendar.current.startOfDay(for: initialStartDate)

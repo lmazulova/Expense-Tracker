@@ -59,7 +59,11 @@ class AnalysisViewController: UIViewController {
 
     init(direction: Direction) {
         self.direction = direction
-        self.viewModel = AnalysisViewModel(direction: direction)
+        self.viewModel = AnalysisViewModel(
+            categoriesService: CategoriesService(localStorage: CategoriesStorage()),
+            direction: direction,
+            transactionService: TransactionsService(localStorage: TransactionStorage())
+        )
         self.sortingOrder = viewModel.selectedOrder
         super.init(nibName: nil, bundle: nil)
     }

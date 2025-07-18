@@ -38,12 +38,12 @@ struct AppTabView: View {
             switch self {
             case .outcome:
                 NavigationStack {
-                    TransactionsListView(viewModel: TransactionListViewModel(direction: .outcome))
+                    TransactionsListView(direction: .outcome)
                         .navigationTitle("Расходы сегодня")
                 }
             case .income:
                 NavigationStack {
-                    TransactionsListView(viewModel: TransactionListViewModel(direction: .income))
+                    TransactionsListView(direction: .income)
                         .navigationTitle("Доходы сегодня")
                 }
             case .account:

@@ -1,10 +1,14 @@
 import Foundation
+import SwiftUI
 
-actor CategoriesService {
+@Observable
+final class CategoriesService {
     private let networkClient: NetworkClient
+    private let localStorage: CategoriesStorageProtocol
     
-    init(networkClient: NetworkClient = NetworkClient()) {
+    init(networkClient: NetworkClient = NetworkClient(), localStorage: CategoriesStorageProtocol) {
         self.networkClient = networkClient
+        self.localStorage = localStorage
     }
     
     func categories() async throws -> [Category] {

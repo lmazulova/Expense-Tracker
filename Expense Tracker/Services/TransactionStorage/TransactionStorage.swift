@@ -2,6 +2,7 @@ import Foundation
 
 import SwiftData
 
+@MainActor
 final class TransactionStorage: TransactionStorageProtocol {
     private let container: ModelContainer
     private let context: ModelContext
@@ -20,11 +21,6 @@ final class TransactionStorage: TransactionStorageProtocol {
         return try context.fetch(descriptor).map { $0.toModel() }
     }
     
-    func fetchAll() async throws -> [Transaction] {
-        let descriptor = FetchDescriptor<TransactionEntity>()
-        return try context.fetch(descriptor).map { $0.toModel() }
-    }
-
     func create(_ transaction: Transaction) async throws {
         context.insert(TransactionEntity(model: transaction))
         try context.save()

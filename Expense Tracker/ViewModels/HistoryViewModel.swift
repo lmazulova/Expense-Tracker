@@ -35,7 +35,7 @@ final class HistoryViewModel {
         transactions.first?.account.currency ?? .rub
     }
     
-    init(transactionService: TransactionsService = TransactionsService(), direction: Direction) {
+    init(transactionService: TransactionsService, direction: Direction) {
         let initialStartDate = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
         self.startDate = Calendar.current.startOfDay(for: initialStartDate)
         self.endDate = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date()

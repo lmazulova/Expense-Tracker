@@ -14,7 +14,7 @@ final class CategoriesViewModel {
     }
     private var debounceTask: Task<Void, Never>? = nil
     
-    init(categoriesService: CategoriesService = CategoriesService()) {
+    init(categoriesService: CategoriesService) {
         self.categoriesService = categoriesService
     }
     

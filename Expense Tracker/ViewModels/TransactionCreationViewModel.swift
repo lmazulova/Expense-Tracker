@@ -23,7 +23,14 @@ final class TransactionCreationViewModel {
     
     var isChoseCategoryPresented: Bool = false
     
-    init(direction: Direction, selectedTransaction: Transaction? = nil) {
+    init(
+        direction: Direction,
+        selectedTransaction: Transaction? = nil,
+        transactionService: TransactionsService,
+        categoriesService: CategoriesService
+    ) {
+        self.transactionService = transactionService
+        self.categoriesService = categoriesService
         self.direction = direction
         self.selectedTransaction = selectedTransaction
         if selectedTransaction != nil {
@@ -37,17 +44,12 @@ final class TransactionCreationViewModel {
             self.comment = transaction.comment ?? ""
             self.currency = transaction.account.currency
         }
-        Task {
-            do {
-                self.categories = try await CategoriesService().categories(with: direction)
-            } catch {
-            }
-        }
     }
     
     private var transaction: Transaction?
     
-    private let transactionService: TransactionsService = TransactionsService()
+    private let transactionService: TransactionsService
+    private let categoriesService: CategoriesService
     
     func editTransaction() async {
             if let id = selectedTransaction?.id,
@@ -87,6 +89,14 @@ final class TransactionCreationViewModel {
             } catch {
                 print("Error creating transaction: \(error)")
             }
+        }
+    }
+    
+    func loadCategories() async {
+        do {
+            self.categories = try await categoriesService.categories(with: direction)
+        } catch {
+            
         }
     }
 }

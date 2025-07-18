@@ -19,9 +19,21 @@ struct TransactionCreationView: View {
         viewModel.amountText.isEmpty || viewModel.selectedCategory == nil
     }
     
-    init(direction: Direction, selectedTransaction: Transaction? = nil) {
+    init(
+        direction: Direction,
+        selectedTransaction: Transaction? = nil,
+        transactionsService: TransactionsService,
+        categoriesService: CategoriesService
+    ) {
         self.direction = direction
-        _viewModel = State(wrappedValue: TransactionCreationViewModel(direction: direction, selectedTransaction: selectedTransaction))
+        _viewModel = State(
+            wrappedValue: TransactionCreationViewModel(
+                direction: direction,
+                selectedTransaction: selectedTransaction,
+                transactionService: transactionsService,
+                categoriesService: categoriesService
+            )
+        )
     }
     
     var body: some View {
@@ -83,6 +95,9 @@ struct TransactionCreationView: View {
             )
             .alert("Пожалуйста, заполните все поля", isPresented: $showAlert) {
                 Button("OK", role: .cancel) { }
+            }
+            .task {
+                await viewModel.loadCategories()
             }
         }
     }

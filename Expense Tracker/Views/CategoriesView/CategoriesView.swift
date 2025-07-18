@@ -1,7 +1,11 @@
 import SwiftUI
 
 struct CategoriesView: View {
-    @State var viewModel = CategoriesViewModel()
+    @State var viewModel: CategoriesViewModel
+    
+    init() {
+        self._viewModel = State(wrappedValue: CategoriesViewModel(categoriesService: CategoriesService(networkClient: NetworkClient(), localStorage: CategoriesStorage())))
+    }
     
     var body: some View {
         List {
@@ -26,5 +30,5 @@ struct CategoriesView: View {
 
 
 #Preview {
-    CategoriesView()
+//    CategoriesView()
 }

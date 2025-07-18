@@ -19,7 +19,8 @@ final class TransactionListViewModel {
     
     var state: LoadingState = .loading
     private(set) var transactions: [Transaction] = []
-    private var transactionService: TransactionsService
+    var transactionsService: TransactionsService
+    var categoriesService: CategoriesService
     var direction: Direction
     
     var sumOfTransactions: Decimal {
@@ -36,15 +37,16 @@ final class TransactionListViewModel {
         return calendar.date(bySettingHour: 23, minute: 59, second: 59, of: today) ?? today
     }
     
-    init(direction: Direction) {
+    init(direction: Direction, transactionsService: TransactionsService, categoriesService: CategoriesService) {
         self.direction = direction
-        self.transactionService = TransactionsService()
+        self.transactionsService = transactionsService
+        self.categoriesService = categoriesService
     }
     
     func loadTransactions() async {
         state = .loading
         do {
-            transactions = try await transactionService.getTransactions(from: startDate, to: endDate)
+            transactions = try await transactionsService.getTransactions(from: startDate, to: endDate)
                 .filter{ $0.category.direction == direction }
             state = .data
         }

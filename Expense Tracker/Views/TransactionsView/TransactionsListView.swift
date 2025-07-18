@@ -7,8 +7,14 @@ struct TransactionsListView: View {
     @State private var showHistory: Bool = false
     @State var firstRequest: Bool = true
     
-    init(viewModel: TransactionListViewModel) {
-        self.viewModel = viewModel
+    init(direction: Direction) {
+        self._viewModel = State(
+            wrappedValue: TransactionListViewModel(
+                direction: direction,
+                transactionsService: TransactionsService(localStorage: TransactionStorage()),
+                categoriesService: CategoriesService(localStorage: CategoriesStorage())
+            )
+        )
     }
     
     var body: some View {
@@ -34,7 +40,7 @@ struct TransactionsListView: View {
                     }
                 }
                 .navigationDestination(isPresented: $showHistory) {
-                    HistoryView(viewModel: HistoryViewModel(direction: viewModel.direction))
+                    HistoryView(viewModel: HistoryViewModel(transactionService: viewModel.transactionsService, direction: viewModel.direction))
                         .navigationTitle("Моя история")
                 }
                 .navigationDestination(for: Transaction.self) { transaction in
@@ -74,7 +80,12 @@ struct TransactionsListView: View {
                 await viewModel.loadTransactions()
             }
         }) {
-            TransactionCreationView(direction: viewModel.direction, selectedTransaction: selectedTransaction)
+            TransactionCreationView(
+                direction: viewModel.direction,
+                selectedTransaction: selectedTransaction,
+                transactionsService: viewModel.transactionsService,
+                categoriesService: viewModel.categoriesService
+            )
         }
     }
     
