@@ -1,5 +1,12 @@
-enum LoadingState {
+enum LoadingState: Equatable {
     case loading
-    case error
+    case error(String)
     case data
+    
+    var errorMessage: String? {
+        if case .error(let message) = self {
+            return message
+        }
+        return nil
+    }
 }

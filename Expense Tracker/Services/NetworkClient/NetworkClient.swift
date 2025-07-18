@@ -18,7 +18,7 @@ final class NetworkClient {
         urlComponents.queryItems = request.queryItems
         
         guard let url = urlComponents.url else {
-            throw URLError(.badURL)
+            throw NetworkError.invalidURL
         }
         
         var urlRequest = URLRequest(url: url)
@@ -31,21 +31,43 @@ final class NetworkClient {
             urlRequest.setValue($0.value, forHTTPHeaderField: $0.key)
         }
         
-        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await URLSession.shared.data(for: urlRequest)
+        } catch let urlError as URLError {
+            switch urlError.code {
+            case .notConnectedToInternet:
+                throw NetworkError.noInternet
+            case .cancelled:
+                throw NetworkError.cancelled
+            default:
+                throw NetworkError.unknown(urlError)
+            }
+        } catch {
+            throw NetworkError.unknown(error)
+        }
         
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
+            throw NetworkError.invalidResponse
         }
         
-        guard (200..<300).contains(httpResponse.statusCode) else {
-            throw NSError(domain: "HTTPError", code: httpResponse.statusCode, userInfo: nil)
+        switch httpResponse.statusCode {
+        case 200..<300:
+            break
+        case 401:
+            throw NetworkError.unauthorized
+        case 400..<500, 500..<600:
+            throw NetworkError.serverError(code: httpResponse.statusCode)
+        default:
+            throw NetworkError.invalidResponse
         }
-        
         do {
             let decoded = try JSONDecoder().decode(Request.Response.self, from: data)
             return decoded
         } catch {
-            throw NSError(domain: "DecodingError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to decode response"])
+            print("Decoding error: ", error)
+            throw NetworkError.decodingError
         }
     }
 }

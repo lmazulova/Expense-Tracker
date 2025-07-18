@@ -8,12 +8,18 @@ struct CategoriesView: View {
     }
     
     var body: some View {
-        List {
-            Section("Статьи") {
-                ForEach(Array(viewModel.filteredCategories.enumerated()), id: \.element.id) { index, category in
-                    CategoryRowView(category: category, isFirst: index == 0)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
+        VStack {
+            if viewModel.state == .loading {
+                ProgressView()
+            } else {
+                List {
+                    Section("Статьи") {
+                        ForEach(Array(viewModel.filteredCategories.enumerated()), id: \.element.id) { index, category in
+                            CategoryRowView(category: category, isFirst: index == 0)
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
+                        }
+                    }
                 }
             }
         }
@@ -24,6 +30,16 @@ struct CategoriesView: View {
         )
         .task {
             await viewModel.loadCategories()
+        }
+        .alert("Упс, что-то пошло не так.", isPresented: .constant({
+            if case .error = viewModel.state { return true }
+            return false
+        }())) {
+            Button("Ок", role: .cancel) {
+                viewModel.state = .data
+            }
+        } message: {
+            Text(viewModel.state.errorMessage ?? "Уже чиним!")
         }
     }
 }

@@ -20,6 +20,7 @@ final class TransactionCreationViewModel {
     var comment: String = ""
     var isEditMode: Bool = false
     var currency: Currency = .rub
+    var state: LoadingState = .loading
     
     var isChoseCategoryPresented: Bool = false
     
@@ -54,6 +55,7 @@ final class TransactionCreationViewModel {
     func editTransaction() async {
             if let id = selectedTransaction?.id,
                let categoryId = selectedCategory?.id {
+                state = .loading
                 do {
                     try await transactionService.editTransaction(
                         transactionId: id,
@@ -62,23 +64,30 @@ final class TransactionCreationViewModel {
                         transactionDate: selectedTime,
                         comment: comment.isEmpty ? "" : comment
                     )
+                    state = .data
                 } catch {
                     print("Ошибка изменения транзакции: - \(error)")
+                    state = .error(error.localizedDescription)
                 }
             }
     }
     
     func deleteTransaction() async {
         if let id = selectedTransaction?.id {
+            state = .loading
             do {
                 try await transactionService.deleteTransaction(byId: id)
+                state = .data
             } catch {
+                print("Ошибка удаления транзакции")
+                state = .error(error.localizedDescription)
             }
         }
     }
     
     func createTransaction() async {
         if let categoryId = selectedCategory?.id {
+            state = .loading
             do {
                 try await transactionService.createTransaction(
                     categoryId: categoryId,
@@ -86,17 +95,22 @@ final class TransactionCreationViewModel {
                     transactionDate: selectedTime,
                     comment: comment.isEmpty ? "" : comment,
                 )
+                state = .data
             } catch {
                 print("Error creating transaction: \(error)")
+                state = .error(error.localizedDescription)
             }
         }
     }
     
     func loadCategories() async {
+        state = .loading
         do {
             self.categories = try await categoriesService.categories(with: direction)
+            state = .data
         } catch {
-            
+            print("Ошибка загрузки категорий")
+            state = .error(error.localizedDescription)
         }
     }
 }

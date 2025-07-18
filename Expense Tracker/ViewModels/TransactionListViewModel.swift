@@ -56,7 +56,7 @@ final class TransactionListViewModel {
                    type: .error)
             print(error.localizedDescription)
             transactions = []
-            state = .error
+            state = .error(error.localizedDescription)
         }
     }
 }

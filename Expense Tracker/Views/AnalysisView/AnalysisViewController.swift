@@ -7,7 +7,9 @@ class AnalysisViewController: UIViewController {
     private let direction: Direction
     private var viewModel: AnalysisViewModel
     private var sortingOrder: SortingOrder
-
+    private var errorAlert: UIAlertController?
+    private var loadingIndicator: UIActivityIndicatorView?
+    
     // MARK: - Lazy Views
 
     private lazy var titleLabel: UILabel = {
@@ -67,6 +69,9 @@ class AnalysisViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
         viewModel.onDataChanged = { [weak self] in
             self?.tableView.reloadData()
+            DispatchQueue.main.async {
+                self?.updateUIForState()
+            }
         }
         Task {
             await viewModel.loadCategories()
@@ -83,28 +88,61 @@ class AnalysisViewController: UIViewController {
         super.viewDidLoad()
         configureLayout()
     }
-
+    
+    private func updateUIForState() {
+        switch viewModel.state {
+        case .loading:
+            if loadingIndicator == nil {
+                let indicator = UIActivityIndicatorView(style: .large)
+                indicator.center = view.center
+                indicator.startAnimating()
+                view.addSubview(indicator)
+                loadingIndicator = indicator
+            }
+        case .error(let message):
+            if errorAlert == nil {
+                let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Ок", style: .cancel) { [weak self] _ in
+                    self?.viewModel.state = .data
+                    self?.errorAlert = nil
+                    self?.updateUIForState()
+                })
+                present(alert, animated: true)
+                errorAlert = alert
+            }
+        case .data:
+            removeLoadingIndicator()
+            tableView.reloadData()
+        }
+    }
+    
+    private func removeLoadingIndicator() {
+        loadingIndicator?.stopAnimating()
+        loadingIndicator?.removeFromSuperview()
+        loadingIndicator = nil
+    }
+    
     // MARK: - Layout
-
+    
     private func configureLayout() {
         view.backgroundColor = .systemGroupedBackground
-
+        
         view.addSubview(titleLabel)
         view.addSubview(tableView)
-
+        
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-
+            
             tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-
+    
     // MARK: - Date Handlers
-
+    
     @objc private func handleFromDateChange(_ newDate: Date) {
         if newDate > viewModel.endDate {
             viewModel.startDate = newDate
@@ -117,7 +155,7 @@ class AnalysisViewController: UIViewController {
             await viewModel.loadCategories()
         }
     }
-
+    
     @objc private func handleToDateChange(_ newDate: Date) {
         if newDate < viewModel.startDate {
             viewModel.startDate = newDate

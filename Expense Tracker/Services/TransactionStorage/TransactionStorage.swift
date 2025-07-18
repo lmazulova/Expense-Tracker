@@ -22,7 +22,7 @@ final class TransactionStorage: TransactionStorageProtocol {
     }
     
     func create(_ transaction: Transaction) async throws {
-        context.insert(TransactionEntity(model: transaction))
+        context.insert(TransactionEntity(model: transaction, context: context))
         try context.save()
     }
 
@@ -47,5 +47,15 @@ final class TransactionStorage: TransactionStorageProtocol {
             context.delete(transaction)
             try context.save()
         }
+    }
+    
+    func save(_ transactions: [Transaction]) async throws {
+        let descriptor = FetchDescriptor<TransactionEntity>()
+        try context.fetch(descriptor).forEach { context.delete($0) }
+        transactions.forEach { transaction in
+            context.insert(TransactionEntity(model: transaction, context: context))
+        }
+        
+        try context.save()
     }
 }

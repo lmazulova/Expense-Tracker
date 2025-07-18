@@ -15,7 +15,7 @@ final class BankAccountViewModel {
     var isEditMode: Bool = false
     private(set) var account: BankAccount?
     
-    init(bankAccountService: BankAccountService = BankAccountService()) {
+    init(bankAccountService: BankAccountService) {
         self.bankAccountService = bankAccountService
     }
     
@@ -33,7 +33,7 @@ final class BankAccountViewModel {
             state = .data
         } catch {
             print("Ошибка при загрузке акаунта: \(error)")
-            state = .error
+            state = .error(error.localizedDescription)
         }
     }
     

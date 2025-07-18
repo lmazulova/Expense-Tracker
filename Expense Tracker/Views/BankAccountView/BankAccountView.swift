@@ -3,12 +3,19 @@ import SwiftUI
 struct BankAccountView: View {
     @State private var showPopup: Bool = false
     @State var isSpoilerOn: Bool = false
-    @State var viewModel: BankAccountViewModel = BankAccountViewModel()
+    @State var viewModel: BankAccountViewModel
     //Переменные для режима редактирования, обновление аккаунта происходит при нажатии на кнопку сохранения
     @State var editBalanceText: String = ""
     @State var editCurrency: Currency = .rub
     @FocusState private var textFieldIsFocused: Bool
     
+    init() {
+        self._viewModel = State(
+            wrappedValue: BankAccountViewModel(
+                bankAccountService: BankAccountService(localStorage: BankAccountStorage())
+            )
+        )
+    }
     var body: some View {
         ScrollView {
             BalanceRow
@@ -67,6 +74,16 @@ struct BankAccountView: View {
                 .presentationBackground(.clear)
         }
         .background(Color(.systemGroupedBackground))
+        .alert("Упс, что-то пошло не так.", isPresented: .constant({
+            if case .error = viewModel.state { return true }
+            return false
+        }())) {
+            Button("Ок", role: .cancel) {
+                viewModel.state = .data
+            }
+        } message: {
+            Text(viewModel.state.errorMessage ?? "Уже чиним!")
+        }
     }
     
     private var BalanceRow: some View {

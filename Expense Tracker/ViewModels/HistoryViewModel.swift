@@ -13,11 +13,13 @@ final class HistoryViewModel {
     var sortedTransactions: [Transaction] = []
     var startDate: Date {
         didSet {
+            validateDates()
             Task { await loadTransactions() }
         }
     }
     var endDate: Date {
         didSet {
+            validateDates()
             Task { await loadTransactions() }
         }
     }
@@ -71,6 +73,16 @@ final class HistoryViewModel {
             sortTransactions()
         } catch {
             print("Ошибка загрузки транзакций - \(error)")
+        }
+    }
+    
+    private func validateDates() {
+        if startDate > endDate {
+            // Если дата начала позже даты конца, устанавливаем дату конца равной дате начала
+            endDate = startDate
+        } else if endDate < startDate {
+            // Если дата конца раньше даты начала, устанавливаем дату начала равной дате конца
+            startDate = endDate
         }
     }
     

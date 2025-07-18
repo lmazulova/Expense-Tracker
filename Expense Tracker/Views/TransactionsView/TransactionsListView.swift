@@ -87,6 +87,16 @@ struct TransactionsListView: View {
                 categoriesService: viewModel.categoriesService
             )
         }
+        .alert("Упс, что-то пошло не так.", isPresented: .constant({
+            if case .error = viewModel.state { return true }
+            return false
+        }())) {
+            Button("Ок", role: .cancel) {
+                viewModel.state = .data
+            }
+        } message: {
+            Text(viewModel.state.errorMessage ?? "Уже чиним!")
+        }
     }
     
     private func transactionRow(index: Int, transaction: Transaction) -> some View {

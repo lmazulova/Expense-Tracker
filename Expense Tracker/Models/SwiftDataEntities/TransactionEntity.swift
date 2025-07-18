@@ -34,7 +34,39 @@ final class TransactionEntity {
         self.category = category
     }
     
-    convenience init(model: Transaction) {
+    convenience init(model: Transaction, context: ModelContext) {
+        // Найти существующий аккаунт или создать новый
+        let accountEntity: BankAccountEntity
+        let accountId = model.account.id
+        let accountDescriptor = FetchDescriptor<BankAccountEntity>(
+            predicate: #Predicate<BankAccountEntity> { entity in
+                entity.id == accountId
+            }
+        )
+        
+        if let existingAccount = try? context.fetch(accountDescriptor).first {
+            accountEntity = existingAccount
+        } else {
+            accountEntity = BankAccountEntity(model: model.account)
+            context.insert(accountEntity)
+        }
+        
+        // Найти существующую категорию или создать новую
+        let categoryEntity: CategoryEntity
+        let categoryId = model.category.id
+        let categoryDescriptor = FetchDescriptor<CategoryEntity>(
+            predicate: #Predicate<CategoryEntity> { entity in
+                entity.id == categoryId
+            }
+        )
+        
+        if let existingCategory = try? context.fetch(categoryDescriptor).first {
+            categoryEntity = existingCategory
+        } else {
+            categoryEntity = CategoryEntity(model: model.category)
+            context.insert(categoryEntity)
+        }
+        
         self.init(
             id: model.id,
             amount: model.amount,
@@ -42,8 +74,8 @@ final class TransactionEntity {
             comment: model.comment,
             createdAt: model.createdAt,
             updatedAt: model.updatedAt,
-            account: BankAccountEntity(model: model.account),
-            category: CategoryEntity(model: model.category)
+            account: accountEntity,
+            category: categoryEntity
         )
     }
 }
@@ -63,3 +95,4 @@ extension TransactionEntity {
         )
     }
 }
+

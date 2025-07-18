@@ -2,6 +2,7 @@
 import SwiftUI
 
 final class AnalysisViewModel {
+    var state: LoadingState = .loading
     var onDataChanged: (() -> Void)?
     var categories: [Category] = []
     var sortedCategories: [Category] = []
@@ -33,12 +34,15 @@ final class AnalysisViewModel {
     }
     
     func loadCategories() async {
+        state = .loading
         do {
             await loadTransactions()
             await categories = try categoriesService.categories(with: direction)
             sortCategories()
+            state = .data
         } catch {
             print("Ошибка загрузки транзакций")
+            state = .error(error.localizedDescription)
         }
         DispatchQueue.main.async { [weak self] in
             self?.onDataChanged?()

@@ -12,15 +12,31 @@ final class CategoriesService {
     }
     
     func categories() async throws -> [Category] {
-        try await networkClient.send(GetCategoriesRequest())
+        do {
+            let categories = try await networkClient.send(GetCategoriesRequest())
+            try await localStorage.save(categories)
+            return categories
+        } catch let error as NetworkError {
+            if case .noInternet = error {
+                return try await localStorage.getAllCategories()
+            }
+            throw error
+        }
     }
     
     func categories(with direction: Direction) async throws -> [Category] {
-        switch direction {
-        case .income:
-            return try await networkClient.send(GetCategoriesWithTypeRequest(type: true))
-        case .outcome:
-            return try await networkClient.send(GetCategoriesWithTypeRequest(type: false))
+        do {
+            switch direction {
+            case .income:
+                return try await networkClient.send(GetCategoriesWithTypeRequest(type: true))
+            case .outcome:
+                return try await networkClient.send(GetCategoriesWithTypeRequest(type: false))
+            }
+        } catch let error as NetworkError {
+            if case .noInternet = error {
+                return try await localStorage.getCategories(by: direction)
+            }
+            throw error
         }
     }
 }

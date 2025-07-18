@@ -5,4 +5,5 @@ protocol TransactionStorageProtocol {
     func create(_ transaction: Transaction) async throws
     func update(_ transaction: Transaction) async throws
     func delete(id: Int) async throws
+    func save(_ transactions: [Transaction]) async throws
 }
