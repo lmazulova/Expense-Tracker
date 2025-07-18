@@ -3,9 +3,14 @@ import Foundation
 @Observable
 final class TransactionsService {
     private let networkClient: NetworkClient
+    private let localStorage: TransactionStorageProtocol
     
-    init(networkClient: NetworkClient = NetworkClient()) {
+    init(
+        networkClient: NetworkClient = NetworkClient(),
+        localStorage: TransactionStorageProtocol = TransactionStorage()
+    ) {
         self.networkClient = networkClient
+        self.localStorage = localStorage
         Task {
             do {
                 let account = try await networkClient.send(GetAccountRequest()).first
@@ -26,7 +31,7 @@ final class TransactionsService {
     }
     
     func createTransaction(categoryId: Int, amount: String, transactionDate: Date, comment: String?) async throws {
-        _ = try await networkClient.send(
+        let response = try await networkClient.send(
             CreateTransactionRequest(
                 categoryId: categoryId,
                 accountId: accountId,
@@ -35,10 +40,11 @@ final class TransactionsService {
                 comment: comment
             )
         )
+        try await localStorage.create(response)
     }
     
     func editTransaction(transactionId: Int, categoryId: Int, amount: String, transactionDate: Date, comment: String?) async throws {
-        _ = try await networkClient.send(UpdateTransactionRequest(
+        let response = try await networkClient.send(UpdateTransactionRequest(
             transactionId: transactionId,
             categoryId: categoryId,
             accountId: accountId,
@@ -46,9 +52,11 @@ final class TransactionsService {
             transactionDate: transactionDate,
             comment: comment
         ))
+        try await localStorage.update(response)
     }
     
     func deleteTransaction(byId id: Int) async throws {
         _ = try await networkClient.send(DeleteTransactionRequest(id: id))
+        try await localStorage.delete(id: id)
     }
 }

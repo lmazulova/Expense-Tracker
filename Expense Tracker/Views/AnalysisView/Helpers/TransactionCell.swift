@@ -115,5 +115,4 @@ struct TransactionCellPreview: UIViewRepresentable {
 
 #Preview {
     TransactionCellPreview()
-        .previewLayout(.fixed(width: 375, height: 64))
 }

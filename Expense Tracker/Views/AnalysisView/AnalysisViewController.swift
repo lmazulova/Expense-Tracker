@@ -210,7 +210,7 @@ extension AnalysisViewController: UITableViewDataSource, UITableViewDelegate {
         section == 0 ? 4 : max(0, viewModel.sortedCategories.count)
     }
 
-    func tableView(_ tableView: UITableView, heightForRowInSection section: Int) -> Int { 60 }
+    private func tableView(_ tableView: UITableView, heightForRowInSection section: Int) -> Int { 60 }
 
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         view.tintColor = .systemGroupedBackground

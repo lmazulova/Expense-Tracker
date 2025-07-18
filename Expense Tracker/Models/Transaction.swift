@@ -17,6 +17,16 @@ extension Transaction: Decodable {
         case id, account, category, amount, transactionDate, comment, createdAt, updatedAt
     }
     
+    private static func decodeDate(_ string: String) -> Date? {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = formatter.date(from: string) {
+            return date
+        }
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter.date(from: string)
+    }
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int.self, forKey: .id)
@@ -27,50 +37,28 @@ extension Transaction: Decodable {
             throw DecodingError.dataCorruptedError(forKey: .amount, in: container, debugDescription: "Invalid decimal string")
         }
         amount = amountDecimal
-        
-        let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+
         let transactionDateString = try container.decode(String.self, forKey: .transactionDate)
-        guard let transactionDateValue = dateFormatter.date(from: transactionDateString) else {
+        guard let transactionDateValue = Self.decodeDate(transactionDateString) else {
             throw DecodingError.dataCorruptedError(forKey: .transactionDate, in: container, debugDescription: "Invalid date string")
         }
         transactionDate = transactionDateValue
-        
+
         let createdAtString = try container.decode(String.self, forKey: .createdAt)
-        guard let createdAtValue = dateFormatter.date(from: createdAtString) else {
+        guard let createdAtValue = Self.decodeDate(createdAtString) else {
             throw DecodingError.dataCorruptedError(forKey: .createdAt, in: container, debugDescription: "Invalid date string")
         }
         createdAt = createdAtValue
-        
+
         let updatedAtString = try container.decode(String.self, forKey: .updatedAt)
-        guard let updatedAtValue = dateFormatter.date(from: updatedAtString) else {
+        guard let updatedAtValue = Self.decodeDate(updatedAtString) else {
             throw DecodingError.dataCorruptedError(forKey: .updatedAt, in: container, debugDescription: "Invalid date string")
         }
         updatedAt = updatedAtValue
+
         comment = try container.decodeIfPresent(String.self, forKey: .comment)
     }
 }
-
-//extension Transaction: Encodable {
-//    enum CodingKeys: String, CodingKey {
-//        case id, account, category, amount, transactionDate, comment, createdAt, updatedAt
-//    }
-//
-//    func encode(to encoder: Encoder) throws {
-//        var container = encoder.container(keyedBy: CodingKeys.self)
-//        try container.encode(id, forKey: .id)
-//        try container.encode(account, forKey: .account)
-//        try container.encode(category, forKey: .category)
-//        // amount как строка
-//        try container.encode(String(describing: amount), forKey: .amount)
-//        // даты как ISO8601-строки
-//        let dateFormatter = ISO8601DateFormatter()
-//        try container.encode(dateFormatter.string(from: transactionDate), forKey: .transactionDate)
-//        try container.encode(dateFormatter.string(from: createdAt), forKey: .createdAt)
-//        try container.encode(dateFormatter.string(from: updatedAt), forKey: .updatedAt)
-//        try container.encodeIfPresent(comment, forKey: .comment)
-//    }
-//}
 
 // MARK: - Конвертирование Transaction в json object и обратно
 extension Transaction {
