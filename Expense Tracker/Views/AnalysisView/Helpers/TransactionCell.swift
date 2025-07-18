@@ -79,7 +79,7 @@ final class TransactionCell: UITableViewCell {
         ])
     }
     
-    func configure(with category: Category, amount: Decimal?, categorySum: Decimal? = nil) {
+    func configure(with category: Category, amount: Decimal?, categorySum: Decimal? = nil, currency: Currency) {
         if let amount = amount, let categorySum = categorySum, abs(amount) > 0 {
             let percentageDecimal = categorySum / amount * 100
             let percentage = NSDecimalNumber(decimal: abs(percentageDecimal)).rounding(accordingToBehavior: nil)
@@ -88,7 +88,7 @@ final class TransactionCell: UITableViewCell {
             percentageLabel.text = "0%"
         }
         
-        let currency = BankAccountManager().account.currency
+        let currency = currency
         
         categoryLabel.text = category.name
         
@@ -107,7 +107,7 @@ struct TransactionCellPreview: UIViewRepresentable {
     func makeUIView(context: Context) -> UITableViewCell {
         let cell = TransactionCell(style: .default, reuseIdentifier: TransactionCell.identifier)
         let category = Category(id: 1, name: "Еда", emoji: "🍔", direction: .income)
-        cell.configure(with: category, amount: 1000, categorySum: 500)
+        cell.configure(with: category, amount: 1000, categorySum: 500, currency: .eur)
         return cell
     }
     func updateUIView(_ uiView: UITableViewCell, context: Context) {}

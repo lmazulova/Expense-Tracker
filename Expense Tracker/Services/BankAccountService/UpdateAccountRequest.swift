@@ -29,7 +29,7 @@ struct UpdateAccountRequest: NetworkRequest {
     }
 }
 
-struct UpdateAccountBody: Codable {
+struct UpdateAccountBody: Encodable {
     let name: String
     let balance: String
     let currency: String

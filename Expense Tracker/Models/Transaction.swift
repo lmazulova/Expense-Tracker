@@ -1,7 +1,7 @@
 import Foundation
 import os.log
 
-struct Transaction: Hashable, Decodable {
+struct Transaction: Hashable {
     let id: Int
     let account: BankAccount
     let category: Category
@@ -12,8 +12,64 @@ struct Transaction: Hashable, Decodable {
     let updatedAt: Date
 }
 
-//extension Transaction: Decodable {
-//    
+extension Transaction: Decodable {
+    enum CodingKeys: String, CodingKey {
+        case id, account, category, amount, transactionDate, comment, createdAt, updatedAt
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(Int.self, forKey: .id)
+        account = try container.decode(BankAccount.self, forKey: .account)
+        category = try container.decode(Category.self, forKey: .category)
+        let amountString = try container.decode(String.self, forKey: .amount)
+        guard let amountDecimal = Decimal(string: amountString) else {
+            throw DecodingError.dataCorruptedError(forKey: .amount, in: container, debugDescription: "Invalid decimal string")
+        }
+        amount = amountDecimal
+        
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let transactionDateString = try container.decode(String.self, forKey: .transactionDate)
+        guard let transactionDateValue = dateFormatter.date(from: transactionDateString) else {
+            throw DecodingError.dataCorruptedError(forKey: .transactionDate, in: container, debugDescription: "Invalid date string")
+        }
+        transactionDate = transactionDateValue
+        
+        let createdAtString = try container.decode(String.self, forKey: .createdAt)
+        guard let createdAtValue = dateFormatter.date(from: createdAtString) else {
+            throw DecodingError.dataCorruptedError(forKey: .createdAt, in: container, debugDescription: "Invalid date string")
+        }
+        createdAt = createdAtValue
+        
+        let updatedAtString = try container.decode(String.self, forKey: .updatedAt)
+        guard let updatedAtValue = dateFormatter.date(from: updatedAtString) else {
+            throw DecodingError.dataCorruptedError(forKey: .updatedAt, in: container, debugDescription: "Invalid date string")
+        }
+        updatedAt = updatedAtValue
+        comment = try container.decodeIfPresent(String.self, forKey: .comment)
+    }
+}
+
+//extension Transaction: Encodable {
+//    enum CodingKeys: String, CodingKey {
+//        case id, account, category, amount, transactionDate, comment, createdAt, updatedAt
+//    }
+//
+//    func encode(to encoder: Encoder) throws {
+//        var container = encoder.container(keyedBy: CodingKeys.self)
+//        try container.encode(id, forKey: .id)
+//        try container.encode(account, forKey: .account)
+//        try container.encode(category, forKey: .category)
+//        // amount как строка
+//        try container.encode(String(describing: amount), forKey: .amount)
+//        // даты как ISO8601-строки
+//        let dateFormatter = ISO8601DateFormatter()
+//        try container.encode(dateFormatter.string(from: transactionDate), forKey: .transactionDate)
+//        try container.encode(dateFormatter.string(from: createdAt), forKey: .createdAt)
+//        try container.encode(dateFormatter.string(from: updatedAt), forKey: .updatedAt)
+//        try container.encodeIfPresent(comment, forKey: .comment)
+//    }
 //}
 
 // MARK: - Конвертирование Transaction в json object и обратно
@@ -124,7 +180,7 @@ extension Transaction {
         "createdAt",
         "updatedAt"
     ]
-  
+    
     var csvLine: String {
         
         var currency: String {
@@ -157,7 +213,7 @@ extension Transaction {
         return fields.joined(separator: ",")
     }
     
-//  в случае если csv ответ содержит названия полей, перед вызовом функции их нужно удалить
+    //  в случае если csv ответ содержит названия полей, перед вызовом функции их нужно удалить
     static func parse(csvLine: String) -> Transaction? {
         let components = csvLine.components(separatedBy: ",")
         

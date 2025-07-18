@@ -70,7 +70,7 @@ final class HistoryViewModel {
             self.transactions = transactions
             sortTransactions()
         } catch {
-            
+            print("Ошибка загрузки транзакций - \(error)")
         }
     }
     

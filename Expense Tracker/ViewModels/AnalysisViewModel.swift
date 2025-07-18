@@ -13,6 +13,7 @@ final class AnalysisViewModel {
     var startDate: Date
     var endDate: Date 
     var direction: Direction
+    var currency: Currency
     private(set) var selectedOrder: SortingOrder = .none
     private var categoriesService: CategoriesService
     
@@ -22,6 +23,7 @@ final class AnalysisViewModel {
         self.endDate = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date()
         self.categoriesService = categoriesService
         self.direction = direction
+        self.currency = TransactionsService.shared.currency
         Task {
             await loadCategories()
         }

@@ -189,7 +189,7 @@ struct TransactionCreationView: View {
     private func confirmationDialogContent() -> some View {
         ForEach(viewModel.categories, id: \.id) { category in
             Button {
-                    viewModel.selectedCategory = category
+                viewModel.selectedCategory = category
             } label: {
                 HStack {
                     Text("\(category.emoji)  \(category.name)")

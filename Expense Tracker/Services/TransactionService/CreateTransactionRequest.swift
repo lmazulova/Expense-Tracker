@@ -1,24 +1,22 @@
 //
-//  UpdateTransactionRequest.swift
+//  CreateTransactionRequest.swift
 //  Expense Tracker
 //
-//  Created by user on 15.07.2025.
+//  Created by user on 18.07.2025.
 //
 
-import Foundation
+import SwiftUI
 
-struct UpdateTransactionRequest: NetworkRequest {
+struct CreateTransactionRequest: NetworkRequest {
     typealias Response = Transaction
     
-    var id: Int
     var categoryId: Int
     var accountId: Int
     var amount: String
     var transactionDate: Date
     var comment: String?
 
-    init(transactionId: Int, categoryId: Int, accountId: Int, amount: String, transactionDate: Date, comment: String? = nil) {
-        self.id = transactionId
+    init(categoryId: Int, accountId: Int, amount: String, transactionDate: Date, comment: String? = nil) {
         self.categoryId = categoryId
         self.accountId = accountId
         self.amount = amount
@@ -26,8 +24,8 @@ struct UpdateTransactionRequest: NetworkRequest {
         self.comment = comment
     }
     
-    var path: String { "/transactions/\(id)" }
-    var method: String { "PUT" }
+    var path: String { "/transactions" }
+    var method: String { "POST" }
     var headers: [String : String] { [:] }
     var queryItems: [URLQueryItem] { [] }
     var body: Data? {
@@ -41,3 +39,4 @@ struct UpdateTransactionRequest: NetworkRequest {
         return try? JSONEncoder().encode(body)
     }
 }
+

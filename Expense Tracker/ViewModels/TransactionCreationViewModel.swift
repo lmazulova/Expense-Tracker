@@ -51,24 +51,17 @@ final class TransactionCreationViewModel {
     
     func editTransaction() async {
             if let id = selectedTransaction?.id,
-               let category = selectedCategory,
-               let amount = amountText.decimalFromLocalizedString(),
-               let createdAt = selectedTransaction?.createdAt {
-                
-                let transaction = Transaction(
-                    id: id,
-                    account: BankAccountManager().account,
-                    category: category,
-                    amount: amount,
-                    transactionDate: selectedDate,
-                    comment: comment.isEmpty ? nil : comment,
-                    createdAt: createdAt,
-                    updatedAt: Date()
-                )
-                
+               let categoryId = selectedCategory?.id {
                 do {
-                    try await transactionService.editTransaction(transaction)
+                    try await transactionService.editTransaction(
+                        transactionId: id,
+                        categoryId: categoryId,
+                        amount: amountText,
+                        transactionDate: selectedTime,
+                        comment: comment.isEmpty ? "" : comment
+                    )
                 } catch {
+                    print("Ошибка изменения транзакции: - \(error)")
                 }
             }
     }
@@ -83,23 +76,16 @@ final class TransactionCreationViewModel {
     }
     
     func createTransaction() async {
-        if let category = selectedCategory,
-           let amount = amountText.decimalFromLocalizedString() {
-            
-            let transaction = Transaction(
-                id: Int.random(in: 1...100_000),
-                account: BankAccountManager().account,
-                category: category,
-                amount: amount,
-                transactionDate: selectedDate,
-                comment: comment.isEmpty ? nil : comment,
-                createdAt: Date(),
-                updatedAt: Date()
-            )
-            
+        if let categoryId = selectedCategory?.id {
             do {
-                try await transactionService.createTransaction(transaction)
+                try await transactionService.createTransaction(
+                    categoryId: categoryId,
+                    amount: amountText,
+                    transactionDate: selectedTime,
+                    comment: comment.isEmpty ? "" : comment,
+                )
             } catch {
+                print("Error creating transaction: \(error)")
             }
         }
     }

@@ -8,11 +8,16 @@
 import Foundation
 
 struct DeleteTransactionRequest: NetworkRequest {
-    typealias Response = Transaction
+    typealias Response = EmptyResponse
+    var id: Int
     
-    var path: String
+    init(id: Int) {
+        self.id = id
+    }
+    
+    var path: String { "/transactions/\(id)" }
     var method: String { "DELETE" }
-    var headers: [String : String]
-    var queryItems: [URLQueryItem]
-    var body: Data?
+    var headers: [String : String] { [:] }
+    var queryItems: [URLQueryItem] { [] }
+    var body: Data? { nil }
 }

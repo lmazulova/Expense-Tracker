@@ -14,7 +14,7 @@ struct BankAccount: Hashable {
     }
 }
 
-extension BankAccount: Codable {
+extension BankAccount: Decodable {
     
     enum CodingKeys: String, CodingKey {
         case id, name, balance, currency

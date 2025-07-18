@@ -5,7 +5,7 @@ class AnalysisViewController: UIViewController {
     // MARK: - Properties
 
     private let direction: Direction
-    private let currency: Currency = BankAccountManager().account.currency
+//    private let currency: Currency = BankAccountManager().account.currency
     private var viewModel: AnalysisViewModel
     private var sortingOrder: SortingOrder
 
@@ -22,7 +22,7 @@ class AnalysisViewController: UIViewController {
 
     private lazy var sumLabel: UILabel = {
         let label = UILabel()
-        label.text = "\(viewModel.sumOfTransactions) \(currency.rawValue)"
+        label.text = "\(viewModel.sumOfTransactions) \(viewModel.currency.rawValue)"
         label.font = .systemFont(ofSize: 17, weight: .regular)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -155,7 +155,7 @@ class AnalysisViewController: UIViewController {
         cell.textLabel?.font = .systemFont(ofSize: 17)
         cell.textLabel?.textColor = .black
 
-        sumLabel.text = "\(viewModel.sumOfTransactions) \(currency.rawValue)"
+        sumLabel.text = "\(viewModel.sumOfTransactions) \(viewModel.currency.rawValue)"
 
         cell.contentView.addSubview(sumLabel)
         NSLayoutConstraint.activate([
@@ -252,7 +252,8 @@ extension AnalysisViewController: UITableViewDataSource, UITableViewDelegate {
             cell.configure(
                 with: category,
                 amount: viewModel.sumOfTransactions,
-                categorySum: viewModel.sumOfCategory(with: category.id)
+                categorySum: viewModel.sumOfCategory(with: category.id),
+                currency: viewModel.currency
             )
             cell.selectionStyle = .none
             return cell
