@@ -11,6 +11,7 @@ import SwiftUI
 @Observable
 final class BankAccountViewModel {
     let bankAccountService: BankAccountService
+    var state: LoadingState = .loading
     var isEditMode: Bool = false
     private(set) var account: BankAccount?
     
@@ -25,11 +26,14 @@ final class BankAccountViewModel {
     }
     
     func loadAccount() async {
+        state = .loading
         do {
             let account = try await bankAccountService.currentAccount()
             self.account = account
+            state = .data
         } catch {
             print("Ошибка при загрузке акаунта: \(error)")
+            state = .error
         }
     }
     

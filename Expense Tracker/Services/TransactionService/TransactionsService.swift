@@ -2,11 +2,9 @@ import Foundation
 
 @Observable
 final class TransactionsService {
-    static let shared: TransactionsService = TransactionsService()
-    
     private let networkClient: NetworkClient
     
-    private init(networkClient: NetworkClient = NetworkClient()) {
+    init(networkClient: NetworkClient = NetworkClient()) {
         self.networkClient = networkClient
         Task {
             do {

@@ -47,7 +47,7 @@ final class TransactionCreationViewModel {
     
     private var transaction: Transaction?
     
-    private let transactionService: TransactionsService = TransactionsService.shared
+    private let transactionService: TransactionsService = TransactionsService()
     
     func editTransaction() async {
             if let id = selectedTransaction?.id,

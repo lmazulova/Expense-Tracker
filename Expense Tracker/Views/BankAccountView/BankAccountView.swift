@@ -80,7 +80,10 @@ struct BankAccountView: View {
             
             Spacer()
             
-            if !viewModel.isEditMode {
+            if viewModel.state == .loading {
+                ProgressView()
+            }
+            else if !viewModel.isEditMode {
                 Text(viewModel.account?.balance.formattedWithLocale() ?? "0")
                     .font(.system(size: 17, weight: .regular))
                     .foregroundColor(.black)
@@ -120,12 +123,16 @@ struct BankAccountView: View {
             
             Spacer()
             
-            Button(action: { showPopup = true }) {
-                Text("\(viewModel.isEditMode ? editCurrency.rawValue : (viewModel.account?.currency.rawValue ?? "₽"))")
-                    .font(.system(size: 17, weight: .regular))
-                    .foregroundColor(viewModel.isEditMode ? .textGray : .black)
+            if viewModel.state == .loading {
+                ProgressView()
+            } else {
+                Button(action: { showPopup = true }) {
+                    Text("\(viewModel.isEditMode ? editCurrency.rawValue : (viewModel.account?.currency.rawValue ?? "₽"))")
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundColor(viewModel.isEditMode ? .textGray : .black)
+                }
+                .disabled(!viewModel.isEditMode)
             }
-            .disabled(!viewModel.isEditMode)
         }
         .padding(11)
         .background {

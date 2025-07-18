@@ -5,7 +5,7 @@ final class AnalysisViewModel {
     var categories: [Category] = []
     var sortedCategories: [Category] = []
     var sumOfTransactions: Decimal {
-        return TransactionsService.shared.allTransactions
+        return transactionService.allTransactions
             .filter { $0.transactionDate >= startDate && $0.transactionDate <= endDate }
             .filter { $0.category.direction == direction}
             .reduce(Decimal.zero) { $0 + $1.amount }
@@ -14,16 +14,22 @@ final class AnalysisViewModel {
     var endDate: Date 
     var direction: Direction
     var currency: Currency
+    private var transactionService: TransactionsService
     private(set) var selectedOrder: SortingOrder = .none
     private var categoriesService: CategoriesService
     
-    init(categoriesService: CategoriesService = CategoriesService(), direction: Direction) {
+    init(
+        categoriesService: CategoriesService = CategoriesService(),
+        direction: Direction,
+        transactionService: TransactionsService = TransactionsService()
+    ) {
         let initialStartDate = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
         self.startDate = Calendar.current.startOfDay(for: initialStartDate)
         self.endDate = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date()
         self.categoriesService = categoriesService
         self.direction = direction
-        self.currency = TransactionsService.shared.currency
+        self.transactionService = transactionService
+        self.currency = transactionService.currency
         Task {
             await loadCategories()
         }
@@ -45,7 +51,7 @@ final class AnalysisViewModel {
     }
     
     func sumOfCategory(with id: Int) -> Decimal {
-        return TransactionsService.shared.allTransactions
+        return transactionService.allTransactions
             .filter { $0.transactionDate >= startDate && $0.transactionDate <= endDate }
             .filter { $0.category.direction == direction && $0.category.id == id }
             .reduce(Decimal.zero) { $0 + $1.amount }
