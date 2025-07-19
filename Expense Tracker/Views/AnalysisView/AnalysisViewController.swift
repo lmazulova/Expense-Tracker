@@ -5,10 +5,11 @@ class AnalysisViewController: UIViewController {
     // MARK: - Properties
 
     private let direction: Direction
-    private let currency: Currency = BankAccountManager().account.currency
     private var viewModel: AnalysisViewModel
     private var sortingOrder: SortingOrder
-
+    private var errorAlert: UIAlertController?
+    private var loadingIndicator: UIActivityIndicatorView?
+    
     // MARK: - Lazy Views
 
     private lazy var titleLabel: UILabel = {
@@ -22,7 +23,7 @@ class AnalysisViewController: UIViewController {
 
     private lazy var sumLabel: UILabel = {
         let label = UILabel()
-        label.text = "\(viewModel.sumOfTransactions) \(currency.rawValue)"
+        label.text = "\(viewModel.sumOfTransactions) \(viewModel.currency.rawValue)"
         label.font = .systemFont(ofSize: 17, weight: .regular)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -59,9 +60,22 @@ class AnalysisViewController: UIViewController {
 
     init(direction: Direction) {
         self.direction = direction
-        self.viewModel = AnalysisViewModel(direction: direction)
+        self.viewModel = AnalysisViewModel(
+            categoriesService: CategoriesService(localStorage: CategoriesStorage()),
+            direction: direction,
+            transactionService: TransactionsService(localStorage: TransactionStorage())
+        )
         self.sortingOrder = viewModel.selectedOrder
         super.init(nibName: nil, bundle: nil)
+        viewModel.onDataChanged = { [weak self] in
+            self?.tableView.reloadData()
+            DispatchQueue.main.async {
+                self?.updateUIForState()
+            }
+        }
+        Task {
+            await viewModel.loadCategories()
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -74,28 +88,61 @@ class AnalysisViewController: UIViewController {
         super.viewDidLoad()
         configureLayout()
     }
-
+    
+    private func updateUIForState() {
+        switch viewModel.state {
+        case .loading:
+            if loadingIndicator == nil {
+                let indicator = UIActivityIndicatorView(style: .large)
+                indicator.center = view.center
+                indicator.startAnimating()
+                view.addSubview(indicator)
+                loadingIndicator = indicator
+            }
+        case .error(let message):
+            if errorAlert == nil {
+                let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Ок", style: .cancel) { [weak self] _ in
+                    self?.viewModel.state = .data
+                    self?.errorAlert = nil
+                    self?.updateUIForState()
+                })
+                present(alert, animated: true)
+                errorAlert = alert
+            }
+        case .data:
+            removeLoadingIndicator()
+            tableView.reloadData()
+        }
+    }
+    
+    private func removeLoadingIndicator() {
+        loadingIndicator?.stopAnimating()
+        loadingIndicator?.removeFromSuperview()
+        loadingIndicator = nil
+    }
+    
     // MARK: - Layout
-
+    
     private func configureLayout() {
         view.backgroundColor = .systemGroupedBackground
-
+        
         view.addSubview(titleLabel)
         view.addSubview(tableView)
-
+        
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-
+            
             tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-
+    
     // MARK: - Date Handlers
-
+    
     @objc private func handleFromDateChange(_ newDate: Date) {
         if newDate > viewModel.endDate {
             viewModel.startDate = newDate
@@ -104,10 +151,11 @@ class AnalysisViewController: UIViewController {
         } else {
             viewModel.startDate = newDate
         }
-        viewModel.sortCategories()
-        tableView.reloadData()
+        Task {
+            await viewModel.loadCategories()
+        }
     }
-
+    
     @objc private func handleToDateChange(_ newDate: Date) {
         if newDate < viewModel.startDate {
             viewModel.startDate = newDate
@@ -116,8 +164,9 @@ class AnalysisViewController: UIViewController {
         } else {
             viewModel.endDate = newDate
         }
-        viewModel.sortCategories()
-        tableView.reloadData()
+        Task {
+            await viewModel.loadCategories()
+        }
     }
 
     // MARK: - Cell Configurators
@@ -155,7 +204,7 @@ class AnalysisViewController: UIViewController {
         cell.textLabel?.font = .systemFont(ofSize: 17)
         cell.textLabel?.textColor = .black
 
-        sumLabel.text = "\(viewModel.sumOfTransactions) \(currency.rawValue)"
+        sumLabel.text = "\(viewModel.sumOfTransactions) \(viewModel.currency.rawValue)"
 
         cell.contentView.addSubview(sumLabel)
         NSLayoutConstraint.activate([
@@ -210,7 +259,7 @@ extension AnalysisViewController: UITableViewDataSource, UITableViewDelegate {
         section == 0 ? 4 : max(0, viewModel.sortedCategories.count)
     }
 
-    func tableView(_ tableView: UITableView, heightForRowInSection section: Int) -> Int { 60 }
+    private func tableView(_ tableView: UITableView, heightForRowInSection section: Int) -> Int { 60 }
 
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         view.tintColor = .systemGroupedBackground
@@ -252,7 +301,8 @@ extension AnalysisViewController: UITableViewDataSource, UITableViewDelegate {
             cell.configure(
                 with: category,
                 amount: viewModel.sumOfTransactions,
-                categorySum: viewModel.sumOfCategory(with: category.id)
+                categorySum: viewModel.sumOfCategory(with: category.id),
+                currency: viewModel.currency
             )
             cell.selectionStyle = .none
             return cell

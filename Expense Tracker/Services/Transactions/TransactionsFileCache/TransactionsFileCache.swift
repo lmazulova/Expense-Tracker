@@ -10,7 +10,7 @@ final class TransactionsFileCache {
     private(set) var transactions: Set<Transaction> = [
         Transaction(
             id: 1,
-            account: BankAccountShort(id: 100, name: "Основной счет", balance: 1000.00, currency: .rub),
+            account: BankAccount(id: 100, name: "Основной счет", balance: 1000.00, currency: .rub),
             category: Category( id: 1, name: "Зарплата", emoji: "💰", direction: .income),
             amount: Decimal(string: "1234.56")!,
             transactionDate: ISO8601DateFormatter().date(from: "2025-06-10T12:00:00Z")!,

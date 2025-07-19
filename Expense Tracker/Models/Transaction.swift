@@ -3,7 +3,7 @@ import os.log
 
 struct Transaction: Hashable {
     let id: Int
-    let account: BankAccountShort
+    let account: BankAccount
     let category: Category
     let amount: Decimal
     let transactionDate: Date
@@ -12,6 +12,53 @@ struct Transaction: Hashable {
     let updatedAt: Date
 }
 
+extension Transaction: Decodable {
+    enum CodingKeys: String, CodingKey {
+        case id, account, category, amount, transactionDate, comment, createdAt, updatedAt
+    }
+    
+    private static func decodeDate(_ string: String) -> Date? {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = formatter.date(from: string) {
+            return date
+        }
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter.date(from: string)
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(Int.self, forKey: .id)
+        account = try container.decode(BankAccount.self, forKey: .account)
+        category = try container.decode(Category.self, forKey: .category)
+        let amountString = try container.decode(String.self, forKey: .amount)
+        guard let amountDecimal = Decimal(string: amountString) else {
+            throw DecodingError.dataCorruptedError(forKey: .amount, in: container, debugDescription: "Invalid decimal string")
+        }
+        amount = amountDecimal
+
+        let transactionDateString = try container.decode(String.self, forKey: .transactionDate)
+        guard let transactionDateValue = Self.decodeDate(transactionDateString) else {
+            throw DecodingError.dataCorruptedError(forKey: .transactionDate, in: container, debugDescription: "Invalid date string")
+        }
+        transactionDate = transactionDateValue
+
+        let createdAtString = try container.decode(String.self, forKey: .createdAt)
+        guard let createdAtValue = Self.decodeDate(createdAtString) else {
+            throw DecodingError.dataCorruptedError(forKey: .createdAt, in: container, debugDescription: "Invalid date string")
+        }
+        createdAt = createdAtValue
+
+        let updatedAtString = try container.decode(String.self, forKey: .updatedAt)
+        guard let updatedAtValue = Self.decodeDate(updatedAtString) else {
+            throw DecodingError.dataCorruptedError(forKey: .updatedAt, in: container, debugDescription: "Invalid date string")
+        }
+        updatedAt = updatedAtValue
+
+        comment = try container.decodeIfPresent(String.self, forKey: .comment)
+    }
+}
 
 // MARK: - Конвертирование Transaction в json object и обратно
 extension Transaction {
@@ -91,7 +138,7 @@ extension Transaction {
         
         return Transaction(
             id: id,
-            account: BankAccountShort(id: accountId, name: accountName, balance: accountBalance, currency: accountCurrency),
+            account: BankAccount(id: accountId, name: accountName, balance: accountBalance, currency: accountCurrency),
             category: Category(id: categoryId, name: categoryName, emoji: categoryEmoji, direction: categoryIsIncome ? .income : .outcome),
             amount: amount,
             transactionDate: transactionDate,
@@ -121,7 +168,7 @@ extension Transaction {
         "createdAt",
         "updatedAt"
     ]
-  
+    
     var csvLine: String {
         
         var currency: String {
@@ -154,7 +201,7 @@ extension Transaction {
         return fields.joined(separator: ",")
     }
     
-//  в случае если csv ответ содержит названия полей, перед вызовом функции их нужно удалить
+    //  в случае если csv ответ содержит названия полей, перед вызовом функции их нужно удалить
     static func parse(csvLine: String) -> Transaction? {
         let components = csvLine.components(separatedBy: ",")
         
@@ -192,7 +239,7 @@ extension Transaction {
         }
         return Transaction(
             id: id,
-            account: BankAccountShort(
+            account: BankAccount(
                 id: accountId,
                 name: components[2],
                 balance: accountBalance,

@@ -9,15 +9,18 @@ import SwiftUI
 
 @Observable
 final class HistoryViewModel {
+    var state: LoadingState = .loading
     var transactions: [Transaction] = []
     var sortedTransactions: [Transaction] = []
     var startDate: Date {
         didSet {
+            validateDates()
             Task { await loadTransactions() }
         }
     }
     var endDate: Date {
         didSet {
+            validateDates()
             Task { await loadTransactions() }
         }
     }
@@ -35,7 +38,7 @@ final class HistoryViewModel {
         transactions.first?.account.currency ?? .rub
     }
     
-    init(transactionService: TransactionsService = TransactionsService.shared, direction: Direction) {
+    init(transactionService: TransactionsService, direction: Direction) {
         let initialStartDate = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
         self.startDate = Calendar.current.startOfDay(for: initialStartDate)
         self.endDate = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date()
@@ -64,13 +67,24 @@ final class HistoryViewModel {
     }
     
     func loadTransactions() async {
+        state = .loading
         do {
             let transactions = try await transactionService.getTransactions(from: startDate, to: endDate)
                 .filter{ $0.category.direction == direction }
             self.transactions = transactions
             sortTransactions()
+            state = .data
         } catch {
-            
+            print("Ошибка загрузки транзакций - \(error)")
+            state = .error(error.localizedDescription)
+        }
+    }
+    
+    private func validateDates() {
+        if startDate > endDate {
+            endDate = startDate
+        } else if endDate < startDate {
+            startDate = endDate
         }
     }
     

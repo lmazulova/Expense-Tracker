@@ -20,10 +20,18 @@ final class TransactionCreationViewModel {
     var comment: String = ""
     var isEditMode: Bool = false
     var currency: Currency = .rub
+    var state: LoadingState = .loading
     
     var isChoseCategoryPresented: Bool = false
     
-    init(direction: Direction, selectedTransaction: Transaction? = nil) {
+    init(
+        direction: Direction,
+        selectedTransaction: Transaction? = nil,
+        transactionService: TransactionsService,
+        categoriesService: CategoriesService
+    ) {
+        self.transactionService = transactionService
+        self.categoriesService = categoriesService
         self.direction = direction
         self.selectedTransaction = selectedTransaction
         if selectedTransaction != nil {
@@ -37,70 +45,72 @@ final class TransactionCreationViewModel {
             self.comment = transaction.comment ?? ""
             self.currency = transaction.account.currency
         }
-        Task {
-            do {
-                self.categories = try await CategoriesService().categories(with: direction)
-            } catch {
-            }
-        }
     }
     
     private var transaction: Transaction?
     
-    private let transactionService: TransactionsService = TransactionsService.shared
+    private let transactionService: TransactionsService
+    private let categoriesService: CategoriesService
     
     func editTransaction() async {
             if let id = selectedTransaction?.id,
-               let category = selectedCategory,
-               let amount = amountText.decimalFromLocalizedString(),
-               let createdAt = selectedTransaction?.createdAt {
-                
-                let transaction = Transaction(
-                    id: id,
-                    account: BankAccountManager().account,
-                    category: category,
-                    amount: amount,
-                    transactionDate: selectedDate,
-                    comment: comment.isEmpty ? nil : comment,
-                    createdAt: createdAt,
-                    updatedAt: Date()
-                )
-                
+               let categoryId = selectedCategory?.id {
+                state = .loading
                 do {
-                    try await transactionService.editTransaction(transaction)
+                    try await transactionService.editTransaction(
+                        transactionId: id,
+                        categoryId: categoryId,
+                        amount: amountText,
+                        transactionDate: selectedTime,
+                        comment: comment.isEmpty ? "" : comment
+                    )
+                    state = .data
                 } catch {
+                    print("Ошибка изменения транзакции: - \(error)")
+                    state = .error(error.localizedDescription)
                 }
             }
     }
     
     func deleteTransaction() async {
         if let id = selectedTransaction?.id {
+            state = .loading
             do {
                 try await transactionService.deleteTransaction(byId: id)
+                state = .data
             } catch {
+                print("Ошибка удаления транзакции")
+                state = .error(error.localizedDescription)
             }
         }
     }
     
     func createTransaction() async {
-        if let category = selectedCategory,
-           let amount = amountText.decimalFromLocalizedString() {
-            
-            let transaction = Transaction(
-                id: Int.random(in: 1...100_000),
-                account: BankAccountManager().account,
-                category: category,
-                amount: amount,
-                transactionDate: selectedDate,
-                comment: comment.isEmpty ? nil : comment,
-                createdAt: Date(),
-                updatedAt: Date()
-            )
-            
+        if let categoryId = selectedCategory?.id {
+            state = .loading
             do {
-                try await transactionService.createTransaction(transaction)
+                try await transactionService.createTransaction(
+                    categoryId: categoryId,
+                    amount: amountText,
+                    transactionDate: selectedTime,
+                    comment: comment.isEmpty ? "" : comment,
+                )
+                state = .data
             } catch {
+                print("Error creating transaction: \(error)")
+                state = .error(error.localizedDescription)
             }
+        }
+    }
+    
+    func loadCategories() async {
+        state = .loading
+        do {
+            self.categories = try await categoriesService.categories(with: direction)
+            state = .data
+        } catch {
+            print("Ошибка загрузки категорий")
+            state = .error(error.localizedDescription)
         }
     }
 }
