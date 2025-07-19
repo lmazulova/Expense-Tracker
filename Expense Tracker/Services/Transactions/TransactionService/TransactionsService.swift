@@ -6,7 +6,6 @@ final class TransactionsService {
     private let networkClient: NetworkClient
     private let localStorage: TransactionStorageProtocol
 //    private let backupStorage: TransactionBackupStorageProtocol
-    private var initialRequest: Bool = true
     init(
         networkClient: NetworkClient = NetworkClient(),
         localStorage: TransactionStorageProtocol,
@@ -36,11 +35,6 @@ final class TransactionsService {
     func getTransactions(from startDate: Date, to endDate: Date) async throws -> [Transaction] {
         do {
             let transactions = try await networkClient.send(GetTransactionRequest(accountId: accountId, startDate: startDate, endDate: endDate))
-            //На случай проверки, чтобы сохранились все транзакции из бека, которые появились до установки приложения
-            if initialRequest {
-                try await localStorage.save(transactions)
-            }
-            initialRequest = false
             return transactions
         }
         catch let error as NetworkError {

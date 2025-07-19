@@ -49,16 +49,6 @@ final class TransactionStorage: TransactionStorageProtocol {
         }
     }
     
-    func save(_ transactions: [Transaction]) async throws {
-        let descriptor = FetchDescriptor<TransactionEntity>()
-        try context.fetch(descriptor).forEach { context.delete($0) }
-        transactions.forEach { transaction in
-            context.insert(TransactionEntity(model: transaction, context: context))
-        }
-        
-        try context.save()
-    }
-    
     // MARK: - Helper methods for finding entities by ID
     
     func findAccountEntity(by id: Int) async throws -> BankAccountEntity? {

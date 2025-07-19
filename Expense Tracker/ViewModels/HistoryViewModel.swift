@@ -9,6 +9,7 @@ import SwiftUI
 
 @Observable
 final class HistoryViewModel {
+    var state: LoadingState = .loading
     var transactions: [Transaction] = []
     var sortedTransactions: [Transaction] = []
     var startDate: Date {
@@ -66,13 +67,16 @@ final class HistoryViewModel {
     }
     
     func loadTransactions() async {
+        state = .loading
         do {
             let transactions = try await transactionService.getTransactions(from: startDate, to: endDate)
                 .filter{ $0.category.direction == direction }
             self.transactions = transactions
             sortTransactions()
+            state = .data
         } catch {
             print("Ошибка загрузки транзакций - \(error)")
+            state = .error(error.localizedDescription)
         }
     }
     

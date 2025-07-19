@@ -23,21 +23,25 @@ struct HistoryView: View {
                 sortRow
                 amountRow
                 
-                Section("Операции") {
-                    ForEach(Array(viewModel.sortedTransactions.enumerated()), id: \.element.id) { index, transaction in
-                        VStack(spacing: 0) {
-                            Divider()
-                                .padding(.leading, 30)
-                                .opacity(index == 0 ? 0 : 1)
-                            
-                            TransactionRowView(transaction: transaction)
-                            
-                            Divider()
-                                .padding(.leading, 30)
-                                .opacity(0)
+                if viewModel.state == .loading {
+                    ProgressView()
+                } else {
+                    Section("Операции") {
+                        ForEach(Array(viewModel.sortedTransactions.enumerated()), id: \.element.id) { index, transaction in
+                            VStack(spacing: 0) {
+                                Divider()
+                                    .padding(.leading, 30)
+                                    .opacity(index == 0 ? 0 : 1)
+                                
+                                TransactionRowView(transaction: transaction)
+                                
+                                Divider()
+                                    .padding(.leading, 30)
+                                    .opacity(0)
+                            }
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                         }
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                     }
                 }
             }
@@ -82,6 +86,16 @@ struct HistoryView: View {
         .fullScreenCover(isPresented: $showAnalysisView) {
             AnalysisView(direction: viewModel.direction)
                 .ignoresSafeArea()
+        }
+        .alert("Упс, что-то пошло не так.", isPresented: .constant({
+            if case .error = viewModel.state { return true }
+            return false
+        }())) {
+            Button("Ок", role: .cancel) {
+                viewModel.state = .data
+            }
+        } message: {
+            Text(viewModel.state.errorMessage ?? "Уже чиним!")
         }
     }
     
