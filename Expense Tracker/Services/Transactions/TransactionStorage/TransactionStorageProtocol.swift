@@ -6,4 +6,8 @@ protocol TransactionStorageProtocol {
     func update(_ transaction: Transaction) async throws
     func delete(id: Int) async throws
     func save(_ transactions: [Transaction]) async throws
+    
+    // Helper methods for finding entities
+    func findAccountEntity(by id: Int) async throws -> BankAccountEntity?
+    func findCategoryEntity(by id: Int) async throws -> CategoryEntity?
 }

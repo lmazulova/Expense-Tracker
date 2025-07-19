@@ -78,10 +78,8 @@ final class HistoryViewModel {
     
     private func validateDates() {
         if startDate > endDate {
-            // Если дата начала позже даты конца, устанавливаем дату конца равной дате начала
             endDate = startDate
         } else if endDate < startDate {
-            // Если дата конца раньше даты начала, устанавливаем дату начала равной дате конца
             startDate = endDate
         }
     }

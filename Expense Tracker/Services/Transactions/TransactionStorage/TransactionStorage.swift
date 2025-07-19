@@ -58,4 +58,24 @@ final class TransactionStorage: TransactionStorageProtocol {
         
         try context.save()
     }
+    
+    // MARK: - Helper methods for finding entities by ID
+    
+    func findAccountEntity(by id: Int) async throws -> BankAccountEntity? {
+        let descriptor = FetchDescriptor<BankAccountEntity>(
+            predicate: #Predicate<BankAccountEntity> { entity in
+                entity.id == id
+            }
+        )
+        return try context.fetch(descriptor).first
+    }
+    
+    func findCategoryEntity(by id: Int) async throws -> CategoryEntity? {
+        let descriptor = FetchDescriptor<CategoryEntity>(
+            predicate: #Predicate<CategoryEntity> { entity in
+                entity.id == id
+            }
+        )
+        return try context.fetch(descriptor).first
+    }
 }
