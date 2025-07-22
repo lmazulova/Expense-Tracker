@@ -8,7 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		CE1EC6152E16AB94009310D4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CE1EC60F2E16AB94009310D4 /* Assets.xcassets */; };
-		CECC9A712E269F1C00461384 /* SwiftKeychainWrapper in Frameworks */ = {isa = PBXBuildFile; productRef = CECC9A702E269F1C00461384 /* SwiftKeychainWrapper */; };
+		CEDA80692E2FC989002016BE /* PieChart in Frameworks */ = {isa = PBXBuildFile; productRef = CEDA80682E2FC989002016BE /* PieChart */; };
+		CEDA806C2E2FDBC2002016BE /* PieChart in Frameworks */ = {isa = PBXBuildFile; productRef = CEDA806B2E2FDBC2002016BE /* PieChart */; };
+		CEDA806F2E2FDBDD002016BE /* SwiftKeychainWrapper in Frameworks */ = {isa = PBXBuildFile; productRef = CEDA806E2E2FDBDD002016BE /* SwiftKeychainWrapper */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,7 +47,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CECC9A712E269F1C00461384 /* SwiftKeychainWrapper in Frameworks */,
+				CEDA806C2E2FDBC2002016BE /* PieChart in Frameworks */,
+				CEDA80692E2FC989002016BE /* PieChart in Frameworks */,
+				CEDA806F2E2FDBDD002016BE /* SwiftKeychainWrapper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,7 +102,9 @@
 			);
 			name = "Expense Tracker";
 			packageProductDependencies = (
-				CECC9A702E269F1C00461384 /* SwiftKeychainWrapper */,
+				CEDA80682E2FC989002016BE /* PieChart */,
+				CEDA806B2E2FDBC2002016BE /* PieChart */,
+				CEDA806E2E2FDBDD002016BE /* SwiftKeychainWrapper */,
 			);
 			productName = "Expense Tracker";
 			productReference = CEB745BF2DF8B03800DADFC6 /* Expense Tracker.app */;
@@ -156,7 +162,8 @@
 			mainGroup = CEB745B62DF8B03700DADFC6;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				CECC9A6F2E269F1C00461384 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */,
+				CEDA806A2E2FDBC2002016BE /* XCLocalSwiftPackageReference "Utilities" */,
+				CEDA806D2E2FDBDD002016BE /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CEB745C02DF8B03800DADFC6 /* Products */;
@@ -458,21 +465,36 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		CEDA806A2E2FDBC2002016BE /* XCLocalSwiftPackageReference "Utilities" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Utilities;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
-		CECC9A6F2E269F1C00461384 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */ = {
+		CEDA806D2E2FDBDD002016BE /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/jrendel/SwiftKeychainWrapper";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.0.1;
+				kind = exactVersion;
+				version = 4.0.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		CECC9A702E269F1C00461384 /* SwiftKeychainWrapper */ = {
+		CEDA80682E2FC989002016BE /* PieChart */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = CECC9A6F2E269F1C00461384 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */;
+			productName = PieChart;
+		};
+		CEDA806B2E2FDBC2002016BE /* PieChart */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PieChart;
+		};
+		CEDA806E2E2FDBDD002016BE /* SwiftKeychainWrapper */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CEDA806D2E2FDBDD002016BE /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */;
 			productName = SwiftKeychainWrapper;
 		};
 /* End XCSwiftPackageProductDependency section */
