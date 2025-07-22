@@ -1,5 +1,7 @@
 import UIKit
 import SwiftUI
+import PieChart
+
 
 class AnalysisViewController: UIViewController {
     // MARK: - Properties
