@@ -49,7 +49,7 @@ struct TransactionsListView: View {
                 Button(action: {
                     isModalPresented = true
                 }) {
-                    Image("plusButton")
+                    Image("addButton")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: ViewConstants.iconSize, height: ViewConstants.iconSize)

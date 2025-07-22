@@ -2,7 +2,6 @@ import UIKit
 import SwiftUI
 import PieChart
 
-
 class AnalysisViewController: UIViewController {
     // MARK: - Properties
 
@@ -56,6 +55,24 @@ class AnalysisViewController: UIViewController {
         table.register(UITableViewCell.self, forCellReuseIdentifier: "amountCell")
         table.register(TransactionCell.self, forCellReuseIdentifier: TransactionCell.identifier)
         return table
+    }()
+    
+    private lazy var pieChart: PieChartView = {
+        let view = PieChartView(
+            frame: CGRect(),
+            colors: ColorScheme(
+                color1: .chartGreen,
+                color2: .chartYellow,
+                color3: .chartRed,
+                color4: .chartPurple,
+                color5: .chartBlue,
+                color6: .chartGrey
+            )
+        )
+        view.entities = [Entity(value: 20000, label: "На собачку"), Entity(value: 80000, label: "На отдых")]
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        return view
     }()
 
     // MARK: - Initializer
@@ -131,6 +148,7 @@ class AnalysisViewController: UIViewController {
         
         view.addSubview(titleLabel)
         view.addSubview(tableView)
+        view.addSubview(pieChart)
         
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
