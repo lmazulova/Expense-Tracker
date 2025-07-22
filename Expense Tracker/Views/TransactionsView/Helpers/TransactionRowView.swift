@@ -49,7 +49,7 @@ private enum ViewConstants {
 #Preview {
     TransactionRowView(transaction: Transaction(
         id: 4,
-        account: BankAccountShort(
+        account: BankAccount(
             id: 1,
             name: "Основной счет",
             balance: 1000.00,

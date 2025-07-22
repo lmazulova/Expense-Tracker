@@ -10,36 +10,41 @@ import SwiftUI
 @MainActor
 @Observable
 final class BankAccountViewModel {
+    let bankAccountService: BankAccountService
+    var state: LoadingState = .loading
     var isEditMode: Bool = false
-    var bankAccountManager: BankAccountManager = BankAccountManager()
-    var currency: Currency = BankAccountManager().account.currency {
-        didSet {
-            bankAccountManager.updateCurrency(currency)
-        }
-    }
-    private(set) var balance: Decimal = BankAccountManager().account.balance {
-        didSet {
-            bankAccountManager.updateBalance(balance)
-        }
+    private(set) var account: BankAccount?
+    
+    init(bankAccountService: BankAccountService) {
+        self.bankAccountService = bankAccountService
     }
     
     func toggleEditMode() {
         withAnimation {
             isEditMode.toggle()
-            if !isEditMode {
-                // При выходе из режима редактирования обновляем текст
-                
-            } else {
-//                initialBalanceText = balanceText
-            }
         }
     }
     
-    func requestForUpdate() async {
-        await bankAccountManager.requestForUpdate()
+    func loadAccount() async {
+        state = .loading
+        do {
+            let account = try await bankAccountService.currentAccount()
+            self.account = account
+            state = .data
+        } catch {
+            print("Ошибка при загрузке акаунта: \(error)")
+            state = .error(error.localizedDescription)
+        }
     }
     
-    func setBalance(balance: Decimal) {
-        self.balance = balance
+    func updateAccount(balance: Decimal, currency: Currency) async {
+        guard var account = account else { return }
+        account = BankAccount(id: account.id, name: account.name, balance: balance, currency: currency)
+        do {
+            let result = try await bankAccountService.updateAccount(account)
+            self.account = result
+        } catch {
+            print("Ошибка при обновлении аккаунта: \(error)")
+        }
     }
 }

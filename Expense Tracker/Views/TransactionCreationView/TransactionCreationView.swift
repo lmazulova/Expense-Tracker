@@ -19,9 +19,21 @@ struct TransactionCreationView: View {
         viewModel.amountText.isEmpty || viewModel.selectedCategory == nil
     }
     
-    init(direction: Direction, selectedTransaction: Transaction? = nil) {
+    init(
+        direction: Direction,
+        selectedTransaction: Transaction? = nil,
+        transactionsService: TransactionsService,
+        categoriesService: CategoriesService
+    ) {
         self.direction = direction
-        _viewModel = State(wrappedValue: TransactionCreationViewModel(direction: direction, selectedTransaction: selectedTransaction))
+        _viewModel = State(
+            wrappedValue: TransactionCreationViewModel(
+                direction: direction,
+                selectedTransaction: selectedTransaction,
+                transactionService: transactionsService,
+                categoriesService: categoriesService
+            )
+        )
     }
     
     var body: some View {
@@ -83,6 +95,19 @@ struct TransactionCreationView: View {
             )
             .alert("Пожалуйста, заполните все поля", isPresented: $showAlert) {
                 Button("OK", role: .cancel) { }
+            }
+            .task {
+                await viewModel.loadCategories()
+            }
+            .alert("Упс, что-то пошло не так.", isPresented: .constant({
+                if case .error = viewModel.state { return true }
+                return false
+            }())) {
+                Button("Ок", role: .cancel) {
+                    viewModel.state = .data
+                }
+            } message: {
+                Text(viewModel.state.errorMessage ?? "Уже чиним!")
             }
         }
     }
@@ -189,7 +214,7 @@ struct TransactionCreationView: View {
     private func confirmationDialogContent() -> some View {
         ForEach(viewModel.categories, id: \.id) { category in
             Button {
-                    viewModel.selectedCategory = category
+                viewModel.selectedCategory = category
             } label: {
                 HStack {
                     Text("\(category.emoji)  \(category.name)")
