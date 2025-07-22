@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		CE1EC6152E16AB94009310D4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CE1EC60F2E16AB94009310D4 /* Assets.xcassets */; };
 		CECC9A712E269F1C00461384 /* SwiftKeychainWrapper in Frameworks */ = {isa = PBXBuildFile; productRef = CECC9A702E269F1C00461384 /* SwiftKeychainWrapper */; };
+		CEDA80692E2FC989002016BE /* PieChart in Frameworks */ = {isa = PBXBuildFile; productRef = CEDA80682E2FC989002016BE /* PieChart */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CEDA80692E2FC989002016BE /* PieChart in Frameworks */,
 				CECC9A712E269F1C00461384 /* SwiftKeychainWrapper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -99,6 +101,7 @@
 			name = "Expense Tracker";
 			packageProductDependencies = (
 				CECC9A702E269F1C00461384 /* SwiftKeychainWrapper */,
+				CEDA80682E2FC989002016BE /* PieChart */,
 			);
 			productName = "Expense Tracker";
 			productReference = CEB745BF2DF8B03800DADFC6 /* Expense Tracker.app */;
@@ -157,6 +160,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				CECC9A6F2E269F1C00461384 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */,
+				CEDA80672E2FC989002016BE /* XCLocalSwiftPackageReference "Utilities" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CEB745C02DF8B03800DADFC6 /* Products */;
@@ -458,6 +462,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		CEDA80672E2FC989002016BE /* XCLocalSwiftPackageReference "Utilities" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Utilities;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		CECC9A6F2E269F1C00461384 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -474,6 +485,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CECC9A6F2E269F1C00461384 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */;
 			productName = SwiftKeychainWrapper;
+		};
+		CEDA80682E2FC989002016BE /* PieChart */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PieChart;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
