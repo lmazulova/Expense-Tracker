@@ -5,15 +5,12 @@ import Foundation
 final class TransactionsService {
     private let networkClient: NetworkClient
     private let localStorage: TransactionStorageProtocol
-//    private let backupStorage: TransactionBackupStorageProtocol
     init(
         networkClient: NetworkClient = NetworkClient(),
         localStorage: TransactionStorageProtocol,
-//        backupStorage: TransactionBackupStorageProtocol = TransactionBackupStorage()
     ) {
         self.networkClient = networkClient
         self.localStorage = localStorage
-//        self.backupStorage = backupStorage
         Task {
             do {
                 let account = try await networkClient.send(GetAccountRequest()).first
@@ -112,7 +109,7 @@ final class TransactionsService {
                 amount: Decimal(string: amount) ?? 0,
                 transactionDate: transactionDate,
                 comment: comment,
-                createdAt: now, // Используем текущее время как время создания
+                createdAt: now,
                 updatedAt: now
             )
             

@@ -6,12 +6,12 @@ final class BankAccountStorage: BankAccountStorageProtocol {
     private let container: ModelContainer
     
     init() {
-        self.container = try! ModelContainer(for: BankAccountEntity.self)
+        self.container = try! ModelContainer(for: BankAccountModel.self)
         self.context = ModelContext(container)
     }
     
     func getAccount() async throws -> BankAccount {
-        let descriptor = FetchDescriptor<BankAccountEntity>()
+        let descriptor = FetchDescriptor<BankAccountModel>()
         let accounts = try context.fetch(descriptor)
         
         guard let account = accounts.first else {
@@ -22,7 +22,7 @@ final class BankAccountStorage: BankAccountStorageProtocol {
     }
     
     func updateAccount(amount: Decimal, currency: Currency) async throws {
-        let descriptor = FetchDescriptor<BankAccountEntity>()
+        let descriptor = FetchDescriptor<BankAccountModel>()
         guard let account = try context.fetch(descriptor).first else {
             throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No account to update"])
         }
@@ -34,14 +34,14 @@ final class BankAccountStorage: BankAccountStorageProtocol {
     
     func saveAccount(account: BankAccount) async throws {
         let id = account.id
-        let descriptor = FetchDescriptor<BankAccountEntity>(predicate: #Predicate { $0.id == id })
+        let descriptor = FetchDescriptor<BankAccountModel>(predicate: #Predicate { $0.id == id })
         
         if let initAccount = try context.fetch(descriptor).first {
             initAccount.name = account.name
             initAccount.balance = account.balance
             initAccount.currencyRaw = account.currency.rawValue
         } else {
-            context.insert(BankAccountEntity(model: account))
+            context.insert(BankAccountModel(model: account))
         }
         try context.save()
     }
