@@ -65,7 +65,8 @@ final class TransactionStorage: TransactionStorageProtocol {
     
     // MARK: - Helper methods for finding entities by ID
     func findOrCreateAccount(from dto: BankAccount) -> BankAccountModel {
-        let descriptor = FetchDescriptor<BankAccountModel>(predicate: #Predicate { $0.id == dto.id })
+        let id: Int = dto.id
+        let descriptor = FetchDescriptor<BankAccountModel>(predicate: #Predicate { $0.id == id })
         if let existing = try? context.fetch(descriptor).first {
             return existing
         } else {
@@ -76,7 +77,8 @@ final class TransactionStorage: TransactionStorageProtocol {
     }
     
     func findOrCreateCategory(from dto: Category) -> CategoryModel {
-        let descriptor = FetchDescriptor<CategoryModel>(predicate: #Predicate { $0.id == dto.id })
+        let id: Int = dto.id
+        let descriptor = FetchDescriptor<CategoryModel>(predicate: #Predicate { $0.id == id })
         if let existing = try? context.fetch(descriptor).first {
             return existing
         } else {

@@ -55,29 +55,7 @@ final class TransactionsService {
             )
             try await localStorage.create(response)
         } catch {
-            // Если сервер вернул ошибку, создаём транзакцию локально с временным ID
-            let temporaryId = TemporaryIDGenerator.generateNextID()
-            let now = Date()
-            
-            // Находим существующие сущности в локальном хранилище
-            guard let accountEntity = try await localStorage.findAccountEntity(by: accountId),
-                  let categoryEntity = try await localStorage.findCategoryEntity(by: categoryId) else {
-                throw NSError(domain: "LocalStorage", code: 0, userInfo: [NSLocalizedDescriptionKey: "Не удалось найти аккаунт или категорию в локальном хранилище"])
-            }
-            
-            // Создаём временную транзакцию
-            let temporaryTransaction = Transaction(
-                id: temporaryId,
-                account: accountEntity.toModel(),
-                category: categoryEntity.toModel(),
-                amount: Decimal(string: amount) ?? 0,
-                transactionDate: transactionDate,
-                comment: comment,
-                createdAt: now,
-                updatedAt: now
-            )
-            
-            try await localStorage.create(temporaryTransaction)
+            //MARK: - здесь нужно сделать сохранение в локальное хранилище
         }
     }
     
@@ -93,27 +71,7 @@ final class TransactionsService {
             ))
             try await localStorage.update(response)
         } catch {
-            // Если сервер вернул ошибку, обновляем транзакцию локально
-            let now = Date()
-            // Находим существующие сущности в локальном хранилище
-            guard let accountEntity = try await localStorage.findAccountEntity(by: accountId),
-                  let categoryEntity = try await localStorage.findCategoryEntity(by: categoryId) else {
-                throw NSError(domain: "LocalStorage", code: 0, userInfo: [NSLocalizedDescriptionKey: "Не удалось найти аккаунт или категорию в локальном хранилище"])
-            }
-            
-            // Создаём обновлённую транзакцию
-            let updatedTransaction = Transaction(
-                id: transactionId,
-                account: accountEntity.toModel(),
-                category: categoryEntity.toModel(),
-                amount: Decimal(string: amount) ?? 0,
-                transactionDate: transactionDate,
-                comment: comment,
-                createdAt: now,
-                updatedAt: now
-            )
-            
-            try await localStorage.update(updatedTransaction)
+            //MARK: - здесь нужно сделать сохранение в локальное хранилище
         }
     }
     

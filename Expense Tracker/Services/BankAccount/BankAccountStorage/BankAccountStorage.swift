@@ -18,7 +18,7 @@ final class BankAccountStorage: BankAccountStorageProtocol {
             throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Account not found"])
         }
         
-        return account.toModel()
+        return account.toDTO()
     }
     
     func updateAccount(amount: Decimal, currency: Currency) async throws {
@@ -41,7 +41,7 @@ final class BankAccountStorage: BankAccountStorageProtocol {
             initAccount.balance = account.balance
             initAccount.currencyRaw = account.currency.rawValue
         } else {
-            context.insert(BankAccountModel(model: account))
+            context.insert(BankAccountModel(from: account))
         }
         try context.save()
     }
