@@ -54,10 +54,12 @@ final class TransactionStorage: TransactionStorageProtocol {
     
     func update(_ transaction: Transaction) async throws {
         let id = transaction.id
+        let account = findOrCreateAccount(from: transaction.account)
+        let category = findOrCreateCategory(from: transaction.category)
         let fetch = FetchDescriptor<TransactionModel>(predicate: #Predicate { $0.id == id })
         if let existing = try context.fetch(fetch).first {
-            existing.account = BankAccountModel(from: transaction.account)
-            existing.category = CategoryModel(from: transaction.category)
+            existing.account = account
+            existing.category = category
             existing.amount = transaction.amount
             existing.transactionDate = transaction.transactionDate
             existing.comment = transaction.comment

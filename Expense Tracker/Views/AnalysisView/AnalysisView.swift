@@ -21,7 +21,8 @@ struct AnalysisView: UIViewControllerRepresentable {
         let analysisVC = AnalysisViewController(
             direction: direction,
             categoriesStorage: dataProvider.categoryStorage,
-            transactionsStorage: dataProvider.transactionStorage
+            transactionsStorage: dataProvider.transactionStorage,
+            bankAccountStorage: dataProvider.bankAccountStorage
         )
         
         let navController = UINavigationController(rootViewController: analysisVC)

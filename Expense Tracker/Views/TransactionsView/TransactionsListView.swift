@@ -57,7 +57,10 @@ struct TransactionsListView: View {
         }
         .task {
             if viewModel.transactionsService == nil {
-                viewModel.transactionsService = TransactionsService(localStorage: dataProvider.transactionStorage)
+                viewModel.transactionsService = TransactionsService(
+                    localStorage: dataProvider.transactionStorage,
+                    bankAccountStorage: dataProvider.bankAccountStorage
+                )
             }
             if viewModel.categoriesService == nil {
                 viewModel.categoriesService = CategoriesService(localStorage: dataProvider.categoryStorage)

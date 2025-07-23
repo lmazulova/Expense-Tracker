@@ -5,6 +5,7 @@ import Foundation
 final class TransactionsService {
     private let networkClient: NetworkClient
     private let localStorage: TransactionStorageProtocol
+    private let bankAccountStorage: BankAccountStorageProtocol
     private(set) var allTransactions: Set<Transaction> = []
     private var accountId: Int?
     var currency: Currency?
@@ -12,9 +13,11 @@ final class TransactionsService {
     init(
         networkClient: NetworkClient = NetworkClient(),
         localStorage: TransactionStorageProtocol,
+        bankAccountStorage: BankAccountStorageProtocol
     ) {
         self.networkClient = networkClient
         self.localStorage = localStorage
+        self.bankAccountStorage = bankAccountStorage
     }
     
     func getTransactions(from startDate: Date, to endDate: Date) async throws -> [Transaction] {
@@ -25,8 +28,12 @@ final class TransactionsService {
                     self.accountId = account?.id
                     self.currency = account?.currency
                 } catch {
-                    print ("Не удалось загрузить аккаунт")
-                    throw error
+                    print ("Не удалось загрузить аккаунт из сети")
+                    do {
+                        self.accountId = try await bankAccountStorage.getCurrentAccountId()
+                    } catch {
+                        throw error
+                    }
                 }
             }
             guard let accountId else {
@@ -59,8 +66,26 @@ final class TransactionsService {
                 )
             )
             try await localStorage.create(response)
-        } catch {
-            //MARK: - здесь нужно сделать сохранение в локальное хранилище
+        } catch let error as NetworkError {
+            if case .noInternet = error  {
+                guard let accountId else {
+                    print("Нет доступного аккаунта для сохранения")
+                    throw error
+                }
+                return try await localStorage.create(
+                    Transaction(
+                        id: TemporaryIDGenerator.generateNextID(),
+                        account: BankAccount(id: accountId, name: "Основной счет", balance:  0, currency: .rub),
+                        category: Category(id: categoryId, name: "Заглушка для создания транзакции", emoji: "🤷‍♂", direction: .income),
+                        amount: amount.decimalFromLocalizedString() ?? 0,
+                        transactionDate: transactionDate,
+                        comment: comment,
+                        createdAt: Date(),
+                        updatedAt: Date()
+                    )
+                )
+            }
+            throw error
         }
     }
     
@@ -79,7 +104,22 @@ final class TransactionsService {
             ))
             try await localStorage.update(response)
         } catch {
-            //MARK: - здесь нужно сделать сохранение в локальное хранилище
+            guard let accountId else {
+                print("Нет доступного аккаунта для сохранения")
+                throw error
+            }
+            return try await localStorage.update(
+                Transaction(
+                    id: transactionId,
+                    account: BankAccount(id: accountId, name: "Основной счет", balance:  0, currency: .rub),
+                    category: Category(id: categoryId, name: "Заглушка для создания транзакции", emoji: "🤷‍♂", direction: .income),
+                    amount: amount.decimalFromLocalizedString() ?? 0,
+                    transactionDate: transactionDate,
+                    comment: comment,
+                    createdAt: Date(),
+                    updatedAt: Date()
+                )
+            )
         }
     }
     
