@@ -9,6 +9,7 @@ struct BankAccountView: View {
     @State var editCurrency: Currency = .rub
     @FocusState private var textFieldIsFocused: Bool
     @Environment(DataProvider.self) private var dataProvider
+    @Environment(AppMode.self) private var appMode
     
     init() {
         self._viewModel = State(wrappedValue: BankAccountViewModel())
@@ -52,6 +53,7 @@ struct BankAccountView: View {
         .task {
             if viewModel.bankAccountService == nil {
                 viewModel.bankAccountService = BankAccountService(localStorage: dataProvider.bankAccountStorage)
+                viewModel.bankAccountService?.appMode = appMode
             }
             await viewModel.loadAccount()
             editBalanceText = viewModel.account?.balance.formattedWithLocale() ?? "0"

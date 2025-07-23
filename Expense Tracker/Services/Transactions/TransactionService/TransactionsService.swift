@@ -8,6 +8,8 @@ final class TransactionsService {
     private let bankAccountStorage: BankAccountStorageProtocol
     private(set) var allTransactions: Set<Transaction> = []
     private var accountId: Int?
+    
+    weak var appMode: AppMode?
     var currency: Currency?
     
     init(
@@ -40,11 +42,17 @@ final class TransactionsService {
                 print ("Не удалось загрузить аккаунт")
                 throw NetworkError.invalidURL
             }
+            await MainActor.run {
+                self.appMode?.isOffline = false
+            }
             let transactions = try await networkClient.send(GetTransactionRequest(accountId: accountId, startDate: startDate, endDate: endDate))
             return transactions
         }
         catch let error as NetworkError {
            if case .noInternet = error  {
+               await MainActor.run {
+                   self.appMode?.isOffline = true
+               }
                return try await localStorage.getTransactions(from: startDate, to: endDate)
            }
         throw error
@@ -65,9 +73,16 @@ final class TransactionsService {
                     comment: comment
                 )
             )
+            await MainActor.run {
+                self.appMode?.isOffline = false
+            }
             try await localStorage.create(response)
         } catch let error as NetworkError {
             if case .noInternet = error  {
+                
+                await MainActor.run {
+                    self.appMode?.isOffline = true
+                }
                 guard let accountId else {
                     print("Нет доступного аккаунта для сохранения")
                     throw error
@@ -103,23 +118,32 @@ final class TransactionsService {
                 comment: comment
             ))
             try await localStorage.update(response)
-        } catch {
-            guard let accountId else {
-                print("Нет доступного аккаунта для сохранения")
-                throw error
+            await MainActor.run {
+                self.appMode?.isOffline = false
             }
-            return try await localStorage.update(
-                Transaction(
-                    id: transactionId,
-                    account: BankAccount(id: accountId, name: "Основной счет", balance:  0, currency: .rub),
-                    category: Category(id: categoryId, name: "Заглушка для создания транзакции", emoji: "🤷‍♂", direction: .income),
-                    amount: amount.decimalFromLocalizedString() ?? 0,
-                    transactionDate: transactionDate,
-                    comment: comment,
-                    createdAt: Date(),
-                    updatedAt: Date()
+        } catch let error as NetworkError {
+            if case .noInternet = error  {
+                guard let accountId else {
+                    print("Нет доступного аккаунта для сохранения")
+                    throw error
+                }
+                await MainActor.run {
+                    self.appMode?.isOffline = true
+                }
+                return try await localStorage.update(
+                    Transaction(
+                        id: transactionId,
+                        account: BankAccount(id: accountId, name: "Основной счет", balance:  0, currency: .rub),
+                        category: Category(id: categoryId, name: "Заглушка для создания транзакции", emoji: "🤷‍♂", direction: .income),
+                        amount: amount.decimalFromLocalizedString() ?? 0,
+                        transactionDate: transactionDate,
+                        comment: comment,
+                        createdAt: Date(),
+                        updatedAt: Date()
+                    )
                 )
-            )
+            }
+            throw error
         }
     }
     

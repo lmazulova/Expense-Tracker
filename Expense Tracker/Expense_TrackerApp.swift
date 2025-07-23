@@ -4,6 +4,7 @@ import SwiftKeychainWrapper
 @main
 struct Expense_TrackerApp: App {
     @State private var dataProvider = DataProvider()
+    @State private var appMode = AppMode()
     private let tabItemSize: Double = 21
     private func setupAppearance() {
         let tabBarAppearance = UITabBarAppearance()
@@ -28,6 +29,7 @@ struct Expense_TrackerApp: App {
             AppTabView()
                 .environment(dataProvider)
                 .environment(\.modelContext, dataProvider.context)
+                .environment(appMode)
                 .onAppear {
                     setupAppearance()
                 }

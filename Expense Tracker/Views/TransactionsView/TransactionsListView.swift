@@ -7,6 +7,7 @@ struct TransactionsListView: View {
     @State private var showHistory: Bool = false
     @State var firstRequest: Bool = true
     @Environment(DataProvider.self) private var dataProvider
+    @Environment(AppMode.self) private var appMode
     
     init(direction: Direction) {
         self._viewModel = State(
@@ -65,6 +66,7 @@ struct TransactionsListView: View {
             if viewModel.categoriesService == nil {
                 viewModel.categoriesService = CategoriesService(localStorage: dataProvider.categoryStorage)
             }
+            viewModel.transactionsService?.appMode = appMode
             await viewModel.loadTransactions()
         }
         .toolbar {
