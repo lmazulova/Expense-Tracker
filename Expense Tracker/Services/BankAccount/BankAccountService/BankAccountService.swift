@@ -19,7 +19,7 @@ actor BankAccountService {
             return account
         } catch let error as NetworkError {
             if case .noInternet = error  {
-                var account = try await localStorage.getAccount()
+                let account = try await localStorage.getAccount()
                 return account
             }
             throw error
@@ -34,7 +34,7 @@ actor BankAccountService {
         } catch let error as NetworkError {
             if case .noInternet = error  {
                 try await localStorage.updateAccount(amount: updated.balance, currency: updated.currency)
-                var account = try await localStorage.getAccount()
+                let account = try await localStorage.getAccount()
                 return account
             }
             throw error

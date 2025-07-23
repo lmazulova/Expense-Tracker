@@ -26,12 +26,12 @@ final class BankAccountViewModel {
     }
     
     func loadAccount() async {
+        state = .loading
         guard let bankAccountService = bankAccountService else {
             print("BankAccountService не инициализирован")
             state = .error("Сервис банковского аккаунта не инициализирован")
             return
         }
-        state = .loading
         do {
             let account = try await bankAccountService.currentAccount()
             self.account = account

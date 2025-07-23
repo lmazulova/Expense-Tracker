@@ -5,32 +5,34 @@ import Foundation
 final class TransactionsService {
     private let networkClient: NetworkClient
     private let localStorage: TransactionStorageProtocol
+    private(set) var allTransactions: Set<Transaction> = []
+    private var accountId: Int?
+    var currency: Currency?
+    
     init(
         networkClient: NetworkClient = NetworkClient(),
         localStorage: TransactionStorageProtocol,
     ) {
         self.networkClient = networkClient
         self.localStorage = localStorage
-        Task {
-            do {
-                let account = try await networkClient.send(GetAccountRequest()).first
-                self.accountId = account?.id ?? 0
-                self.currency = account?.currency ?? .rub
-            } catch {
-//                let account = try await BankAccountStorage().getAccount()
-//                self.accountId = account.id
-//                self.currency = account.currency
-                print("Не удалось загрузить аккаунт - \(error)")
-            }
-        }
     }
-    
-    private(set) var allTransactions: Set<Transaction> = []
-    private var accountId: Int = 0
-    var currency: Currency = .rub
     
     func getTransactions(from startDate: Date, to endDate: Date) async throws -> [Transaction] {
         do {
+            if accountId == nil || currency == nil {
+                do {
+                    let account = try await networkClient.send(GetAccountRequest()).first
+                    self.accountId = account?.id
+                    self.currency = account?.currency
+                } catch {
+                    print ("Не удалось загрузить аккаунт")
+                    throw error
+                }
+            }
+            guard let accountId else {
+                print ("Не удалось загрузить аккаунт")
+                throw NetworkError.invalidURL
+            }
             let transactions = try await networkClient.send(GetTransactionRequest(accountId: accountId, startDate: startDate, endDate: endDate))
             return transactions
         }
@@ -44,6 +46,9 @@ final class TransactionsService {
     
     func createTransaction(categoryId: Int, amount: String, transactionDate: Date, comment: String?) async throws {
         do {
+            guard let accountId else {
+                throw NetworkError.invalidURL
+            }
             let response = try await networkClient.send(
                 CreateTransactionRequest(
                     categoryId: categoryId,
@@ -61,6 +66,9 @@ final class TransactionsService {
     
     func editTransaction(transactionId: Int, categoryId: Int, amount: String, transactionDate: Date, comment: String?) async throws {
         do {
+            guard let accountId else {
+                throw NetworkError.invalidURL
+            }
             let response = try await networkClient.send(UpdateTransactionRequest(
                 transactionId: transactionId,
                 categoryId: categoryId,

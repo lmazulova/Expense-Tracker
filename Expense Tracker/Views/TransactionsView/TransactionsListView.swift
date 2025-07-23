@@ -55,13 +55,6 @@ struct TransactionsListView: View {
                 .padding(EdgeInsets(top: 0, leading: 0, bottom: 30, trailing: 16))
             }
         }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(action: { showHistory = true }) {
-                    Image("historyButton")
-                }
-            }
-        }
         .task {
             if viewModel.transactionsService == nil {
                 viewModel.transactionsService = TransactionsService(localStorage: dataProvider.transactionStorage)
@@ -70,6 +63,13 @@ struct TransactionsListView: View {
                 viewModel.categoriesService = CategoriesService(localStorage: dataProvider.categoryStorage)
             }
             await viewModel.loadTransactions()
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(action: { showHistory = true }) {
+                    Image("historyButton")
+                }
+            }
         }
         .fullScreenCover(isPresented: $isModalPresented, onDismiss: {
             selectedTransaction = nil

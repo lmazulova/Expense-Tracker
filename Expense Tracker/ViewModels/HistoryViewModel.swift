@@ -67,12 +67,12 @@ final class HistoryViewModel {
     }
     
     func loadTransactions() async {
+        state = .loading
         guard let transactionService = transactionService else {
             print("TransactionService не инициализирован")
             state = .error("Сервис транзакций не инициализирован")
             return
         }
-        state = .loading
         do {
             let transactions = try await transactionService.getTransactions(from: startDate, to: endDate)
                 .filter{ $0.category.direction == direction }

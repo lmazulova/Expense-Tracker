@@ -20,12 +20,12 @@ final class CategoriesViewModel {
     }
     
     func loadCategories() async {
+        state = .loading
         guard let categoriesService else {
             print("CategoriesService не инициализирован")
             state = .error("Упс, что-то пошло не так. Попробуйте позже.")
             return
         }
-        state = .loading
         do {
             let categories = try await categoriesService.categories()
             self.allCategories = categories

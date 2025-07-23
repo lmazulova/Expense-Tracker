@@ -51,13 +51,13 @@ final class TransactionCreationViewModel {
     }
     
     func editTransaction() async {
+        state = .loading
         guard let transactionService else {
             print("TransactionService не инициализирован")
             return
         }
         if let id = selectedTransaction?.id,
            let categoryId = selectedCategory?.id {
-            state = .loading
             do {
                 try await transactionService.editTransaction(
                     transactionId: id,
