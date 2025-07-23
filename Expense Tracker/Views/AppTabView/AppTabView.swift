@@ -1,14 +1,9 @@
-//
-//  AppTabView.swift
-//  Expense Tracker
-//
-//  Created by user on 18.06.2025.
-//
-
 import SwiftUI
 
 struct AppTabView: View {
     @State private var selectedTab: Tab = .outcome
+    @Environment(AppMode.self) private var appMode
+    
     private let tabItemSize: Double = 21
     
     enum Tab: String, CaseIterable {
@@ -68,21 +63,33 @@ struct AppTabView: View {
     
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            ForEach(Tab.allCases, id: \.self) { tab in
-                tab.view
-                    .tabItem(){
-                        Label {
-                            Text(tab.title)
-                        } icon: {
-                            Image(tab.rawValue)
-                                .renderingMode(.template)
-                                .frame(width: tabItemSize, height: tabItemSize)
+        VStack(spacing: 0) {
+            if appMode.isOffline {
+                Text("Вы в офлайн режиме")
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(8)
+                    .background(Color.red)
+                    .transition(.move(edge: .top))
+            }
+
+            TabView(selection: $selectedTab) {
+                ForEach(Tab.allCases, id: \.self) { tab in
+                    tab.view
+                        .tabItem(){
+                            Label {
+                                Text(tab.title)
+                            } icon: {
+                                Image(tab.rawValue)
+                                    .renderingMode(.template)
+                                    .frame(width: tabItemSize, height: tabItemSize)
+                            }
                         }
-                    }
-                    .tag(tab)
+                        .tag(tab)
+                }
             }
         }
+        .animation(.easeInOut, value: appMode.isOffline)
     }
 }
 

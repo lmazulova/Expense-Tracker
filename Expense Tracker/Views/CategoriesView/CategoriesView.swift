@@ -3,6 +3,7 @@ import SwiftUI
 struct CategoriesView: View {
     @State var viewModel: CategoriesViewModel
     @Environment(DataProvider.self) private var dataProvider
+    @Environment(AppMode.self) private var appMode
     
     init() {
         self._viewModel = State(wrappedValue: CategoriesViewModel())
@@ -32,6 +33,7 @@ struct CategoriesView: View {
         .task {
             if viewModel.categoriesService == nil {
                 viewModel.categoriesService = CategoriesService(localStorage: dataProvider.categoryStorage)
+                viewModel.categoriesService?.appMode = appMode
             }
             await viewModel.loadCategories()
         }

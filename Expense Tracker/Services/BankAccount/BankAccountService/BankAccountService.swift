@@ -1,8 +1,10 @@
 import Foundation
 
-actor BankAccountService {
+@Observable
+final class BankAccountService {
     private let networkClient: NetworkClient
     private let localStorage: BankAccountStorageProtocol & BankAccountBackupProtocol
+    weak var appMode: AppMode?
     
     init(networkClient: NetworkClient = NetworkClient(), localStorage: BankAccountStorageProtocol & BankAccountBackupProtocol) {
         self.networkClient = networkClient
@@ -17,9 +19,15 @@ actor BankAccountService {
                 throw NSError(domain: "NoAccounts", code: 0, userInfo: nil)
             }
             try await localStorage.saveAccount(account: account)
+            await MainActor.run {
+                self.appMode?.isOffline = false
+            }
             return account
         } catch let error as NetworkError {
             if case .noInternet = error  {
+                await MainActor.run {
+                    self.appMode?.isOffline = true
+                }
                 let account = try await localStorage.getAccount()
                 return account
             }
@@ -31,9 +39,15 @@ actor BankAccountService {
         do {
             let account = try await networkClient.send(UpdateAccountRequest(account: updated))
             try await localStorage.updateAccount(amount: updated.balance, currency: updated.currency)
+            await MainActor.run {
+                self.appMode?.isOffline = false
+            }
             return account
         } catch let error as NetworkError {
             if case .noInternet = error  {
+                await MainActor.run {
+                    self.appMode?.isOffline = true
+                }
                 try await localStorage.updateAccount(amount: updated.balance, currency: updated.currency)
                 try await localStorage.saveBackupUpdate(balance: updated.balance, currency: updated.currency)
                 let account = try await localStorage.getAccount()
