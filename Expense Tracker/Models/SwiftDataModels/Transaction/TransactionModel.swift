@@ -33,19 +33,6 @@ final class TransactionModel {
         self.account = account
         self.category = category
     }
-    
-//    convenience init(from dto: Transaction) {
-//        self.init(
-//            id: dto.id,
-//            amount: dto.amount,
-//            transactionDate: dto.transactionDate,
-//            comment: dto.comment,
-//            createdAt: dto.createdAt,
-//            updatedAt: dto.updatedAt,
-//            account: BankAccountModel(from: dto.account),
-//            category: CategoryModel(from: dto.category)
-//        )
-//    }
 }
 
 //MARK: - Преобразование из model в структуру
