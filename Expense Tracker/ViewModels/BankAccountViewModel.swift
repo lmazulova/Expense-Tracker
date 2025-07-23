@@ -34,7 +34,6 @@ final class BankAccountViewModel {
         }
         do {
             let account = try await bankAccountService.currentAccount()
-            try await bankAccountService.syncBackupUpdates()
             self.account = account
             state = .data
         } catch {

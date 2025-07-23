@@ -13,11 +13,19 @@ final class DataProvider {
     let bankAccountStorage: BankAccountStorage
     
     init() {
+        let storeURL = FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)
+            .first!
+            .appendingPathComponent("ExpenseTracker.sqlite")
+
+        let modelConfig = ModelConfiguration(url: storeURL)
+        
         self.container = try! ModelContainer(
             for: TransactionModel.self,
             BankAccountModel.self,
             CategoryModel.self,
-            BankAccountBackupModel.self
+            BankAccountBackupModel.self,
+            configurations: modelConfig
         )
         self.context = ModelContext(container)
         

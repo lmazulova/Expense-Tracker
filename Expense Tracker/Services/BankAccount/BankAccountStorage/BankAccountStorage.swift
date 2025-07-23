@@ -16,8 +16,8 @@ final class BankAccountStorage: BankAccountStorageProtocol {
         guard let account = accounts.first else {
             throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Account not found"])
         }
-        
-        return account.toDTO()
+        let bankAccount = account.toDTO()
+        return bankAccount
     }
     
     func updateAccount(amount: Decimal, currency: Currency) async throws {

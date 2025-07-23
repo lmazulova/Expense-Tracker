@@ -32,7 +32,7 @@ extension BankAccountModel {
             id: id,
             name: name,
             balance: balance,
-            currency: Currency(rawValue: currencyRaw) ?? .rub
+            currency: Currency(rawServerCode: currencyRaw) ?? .rub
         )
     }
 }

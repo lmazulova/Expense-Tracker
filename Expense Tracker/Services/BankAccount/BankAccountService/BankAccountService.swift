@@ -11,6 +11,7 @@ actor BankAccountService {
     
     func currentAccount() async throws -> BankAccount {
         do {
+            try await syncBackupUpdates()
             let accounts = try await networkClient.send(GetAccountRequest())
             guard let account = accounts.first else {
                 throw NSError(domain: "NoAccounts", code: 0, userInfo: nil)
@@ -30,7 +31,6 @@ actor BankAccountService {
         do {
             let account = try await networkClient.send(UpdateAccountRequest(account: updated))
             try await localStorage.updateAccount(amount: updated.balance, currency: updated.currency)
-            try await localStorage.saveBackupUpdate(balance: updated.balance, currency: updated.currency)
             return account
         } catch let error as NetworkError {
             if case .noInternet = error  {
@@ -46,7 +46,10 @@ actor BankAccountService {
 
 extension BankAccountService: BackupSyncProtocol {
     func syncBackupUpdates() async throws {
-        guard let pending = try await localStorage.fetchBackupUpdate() else { return }
+        guard let pending = try await localStorage.fetchBackupUpdate() else {
+            print("Синхронизировать нечего")
+            return
+        }
         
         let localAccount = try await localStorage.getAccount()
         
@@ -54,10 +57,11 @@ extension BankAccountService: BackupSyncProtocol {
             id: localAccount.id,
             name: localAccount.name,
             balance: pending.balance,
-            currency: Currency(rawValue: pending.currencyRaw) ?? localAccount.currency
+            currency: Currency(rawServerCode: pending.currencyRaw) ?? .rub
         )
         
         _ = try await updateAccount(accountToUpdate)
+        print("Синхронизирован аккаунт \(accountToUpdate)")
         try await localStorage.clearBackupUpdates()
     }
 }
