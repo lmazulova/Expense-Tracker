@@ -1,6 +1,7 @@
 import SwiftData
 import Foundation
 
+@MainActor
 final class BankAccountStorage: BankAccountStorageProtocol {
     private let context: ModelContext
     
@@ -47,5 +48,30 @@ final class BankAccountStorage: BankAccountStorageProtocol {
     func getCurrentAccountId() async throws -> Int {
         let account = try await getAccount()
         return account.id
+    }
+}
+
+
+extension BankAccountStorage: BankAccountBackupProtocol {
+    func saveBackupUpdate(balance: Decimal, currency: Currency) async throws {
+        let update = BankAccountBackupModel(balance: balance, currencyRaw: currency.serverCode)
+        context.insert(update)
+        try context.save()
+    }
+    
+    func fetchBackupUpdate() async throws -> BankAccountBackupModel? {
+        let descriptor = FetchDescriptor<BankAccountBackupModel>(
+            sortBy: [SortDescriptor(\.timestamp, order: .forward)]
+        )
+        return try context.fetch(descriptor).first
+    }
+    
+    func clearBackupUpdates() async throws {
+        let descriptor = FetchDescriptor<BankAccountBackupModel>()
+        let updates = try context.fetch(descriptor)
+        for update in updates {
+            context.delete(update)
+        }
+        try context.save()
     }
 }

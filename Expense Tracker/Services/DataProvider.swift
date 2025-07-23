@@ -16,7 +16,8 @@ final class DataProvider {
         self.container = try! ModelContainer(
             for: TransactionModel.self,
             BankAccountModel.self,
-            CategoryModel.self
+            CategoryModel.self,
+            BankAccountBackupModel.self
         )
         self.context = ModelContext(container)
         

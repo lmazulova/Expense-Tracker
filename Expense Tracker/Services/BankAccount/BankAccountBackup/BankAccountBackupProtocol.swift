@@ -1,8 +1,7 @@
-//
-//  BankAccountBackupProtocol.swift
-//  Expense Tracker
-//
-//  Created by user on 23.07.2025.
-//
-
 import Foundation
+
+protocol BankAccountBackupProtocol {
+    func saveBackupUpdate(balance: Decimal, currency: Currency) async throws
+    func fetchBackupUpdate() async throws -> BankAccountBackupModel?
+    func clearBackupUpdates() async throws
+}
