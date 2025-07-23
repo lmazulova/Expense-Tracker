@@ -2,7 +2,7 @@ import SwiftData
 import Foundation
 
 @Model
-final class CategoryEntity {
+final class CategoryModel {
     @Attribute(.unique) var id: Int
     var name: String
     var emoji: String
@@ -15,23 +15,23 @@ final class CategoryEntity {
         self.isIncome = isIncome
     }
     
-    convenience init(model: Category) {
+    convenience init(from dto: Category) {
         self.init(
-            id: model.id,
-            name: model.name,
-            emoji: String(model.emoji),
-            isIncome: model.direction == .income
+            id: dto.id,
+            name: dto.name,
+            emoji: String(dto.emoji),
+            isIncome: dto.direction == .income
         )
     }
 }
 
-//MARK: - Преобразование и entity в model
-extension CategoryEntity {
-    func toModel() -> Category {
+//MARK: - Преобразование из model в структуру
+extension CategoryModel {
+    func toDTO() -> Category {
         Category(
             id: id,
             name: name,
-            emoji: emoji.first ?? "🤷‍♂",
+            emoji: emoji[emoji.startIndex],
             direction: isIncome ? .income : .outcome
         )
     }

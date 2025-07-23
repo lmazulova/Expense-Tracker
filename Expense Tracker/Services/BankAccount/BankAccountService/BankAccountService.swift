@@ -2,15 +2,16 @@ import Foundation
 
 actor BankAccountService {
     private let networkClient: NetworkClient
-    private let localStorage: BankAccountStorageProtocol
+    private let localStorage: BankAccountStorageProtocol & BankAccountBackupProtocol
     
-    init(networkClient: NetworkClient = NetworkClient(), localStorage: BankAccountStorageProtocol) {
+    init(networkClient: NetworkClient = NetworkClient(), localStorage: BankAccountStorageProtocol & BankAccountBackupProtocol) {
         self.networkClient = networkClient
         self.localStorage = localStorage
     }
     
     func currentAccount() async throws -> BankAccount {
         do {
+            try await syncBackupUpdates()
             let accounts = try await networkClient.send(GetAccountRequest())
             guard let account = accounts.first else {
                 throw NSError(domain: "NoAccounts", code: 0, userInfo: nil)
@@ -19,26 +20,7 @@ actor BankAccountService {
             return account
         } catch let error as NetworkError {
             if case .noInternet = error  {
-                var account = try await localStorage.getAccount()
-//                let backups = try backupStorage.allBackups()
-//                for backup in backups {
-//                    switch backup.action {
-//                    case .changeCurrency:
-//                        if let newCurrency = backup.stringValue {
-//                            account.currency = newCurrency
-//                        }
-//                    
-//                    case .changeBalance:
-//                        if let amount = backup.decimalValue {
-//                            account.balance += amount
-//                        }
-//                    
-//                    case .changeTransaction:
-//                        if let delta = backup.decimalValue {
-//                            account.balance += delta
-//                        }
-//                    }
-//                }
+                let account = try await localStorage.getAccount()
                 return account
             }
             throw error
@@ -53,31 +35,33 @@ actor BankAccountService {
         } catch let error as NetworkError {
             if case .noInternet = error  {
                 try await localStorage.updateAccount(amount: updated.balance, currency: updated.currency)
-                var account = try await localStorage.getAccount()
-//                let backups = try backupStorage.allBackups()
-//                for backup in backups {
-//                    switch backup.action {
-//                    case .changeCurrency:
-//                        if let newCurrency = backup.stringValue {
-//                            account.currency = newCurrency
-//                        }
-//                    
-//                    case .changeBalance:
-//                        if let amount = backup.decimalValue {
-//                            account.balance += amount
-//                        }
-//                    
-//                    case .changeTransaction:
-//                        if let delta = backup.decimalValue {
-//                            account.balance += delta
-//                        }
-//                    }
-//                }
-//                try backupStorage.addBalanceChange(amount: amount - account.balance)
-//                try backupStorage.addChangeCurrency(newCurrency: newCurrencyCode)
+                try await localStorage.saveBackupUpdate(balance: updated.balance, currency: updated.currency)
+                let account = try await localStorage.getAccount()
                 return account
             }
             throw error
         }
+    }
+}
+
+extension BankAccountService: BackupSyncProtocol {
+    func syncBackupUpdates() async throws {
+        guard let pending = try await localStorage.fetchBackupUpdate() else {
+            print("Синхронизировать нечего")
+            return
+        }
+        
+        let localAccount = try await localStorage.getAccount()
+        
+        let accountToUpdate = BankAccount(
+            id: localAccount.id,
+            name: localAccount.name,
+            balance: pending.balance,
+            currency: Currency(rawServerCode: pending.currencyRaw) ?? .rub
+        )
+        
+        _ = try await updateAccount(accountToUpdate)
+        print("Синхронизирован аккаунт \(accountToUpdate)")
+        try await localStorage.clearBackupUpdates()
     }
 }

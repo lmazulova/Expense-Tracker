@@ -2,9 +2,10 @@ import SwiftUI
 
 struct CategoriesView: View {
     @State var viewModel: CategoriesViewModel
+    @Environment(DataProvider.self) private var dataProvider
     
     init() {
-        self._viewModel = State(wrappedValue: CategoriesViewModel(categoriesService: CategoriesService(networkClient: NetworkClient(), localStorage: CategoriesStorage())))
+        self._viewModel = State(wrappedValue: CategoriesViewModel())
     }
     
     var body: some View {
@@ -29,6 +30,9 @@ struct CategoriesView: View {
             prompt: "Search"
         )
         .task {
+            if viewModel.categoriesService == nil {
+                viewModel.categoriesService = CategoriesService(localStorage: dataProvider.categoryStorage)
+            }
             await viewModel.loadCategories()
         }
         .alert("Упс, что-то пошло не так.", isPresented: .constant({

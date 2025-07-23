@@ -30,7 +30,7 @@ final class AnalysisViewModel {
         self.categoriesService = categoriesService
         self.direction = direction
         self.transactionsService = transactionService
-        self.currency = transactionService.currency
+        self.currency = transactionService.currency ?? .rub
     }
     
     func loadCategories() async {

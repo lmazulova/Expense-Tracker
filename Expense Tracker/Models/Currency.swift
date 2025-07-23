@@ -36,3 +36,14 @@ extension Currency: Codable {
         }
     }
 }
+extension Currency {
+    init?(rawServerCode: String) {
+        switch rawServerCode {
+        case "RUB": self = .rub
+        case "USD": self = .usd
+        case "EUR": self = .eur
+        default: return nil
+        }
+    }
+}
+

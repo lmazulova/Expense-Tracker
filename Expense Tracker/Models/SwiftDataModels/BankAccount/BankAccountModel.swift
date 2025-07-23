@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class BankAccountEntity {
+final class BankAccountModel {
     @Attribute(.unique) var id: Int
     var name: String
     var balance: Decimal
@@ -15,24 +15,24 @@ final class BankAccountEntity {
         self.currencyRaw = currencyRaw
     }
     
-    convenience init(model: BankAccount) {
+    convenience init(from dto: BankAccount) {
         self.init(
-            id: model.id,
-            name: model.name,
-            balance: model.balance,
-            currencyRaw: model.currency.rawValue
+            id: dto.id,
+            name: dto.name,
+            balance: dto.balance,
+            currencyRaw: dto.currency.rawValue
         )
     }
 }
 
-//MARK: - Преобразование и entity в model
-extension BankAccountEntity {
-    func toModel() -> BankAccount {
+//MARK: - Преобразование из model в структуру
+extension BankAccountModel {
+    func toDTO() -> BankAccount {
         BankAccount(
             id: id,
             name: name,
             balance: balance,
-            currency: Currency(rawValue: currencyRaw) ?? .rub
+            currency: Currency(rawServerCode: currencyRaw) ?? .rub
         )
     }
 }

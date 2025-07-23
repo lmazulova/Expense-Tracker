@@ -5,35 +5,41 @@ import Foundation
 final class TransactionsService {
     private let networkClient: NetworkClient
     private let localStorage: TransactionStorageProtocol
-//    private let backupStorage: TransactionBackupStorageProtocol
+    private let bankAccountStorage: BankAccountStorageProtocol
+    private(set) var allTransactions: Set<Transaction> = []
+    private var accountId: Int?
+    var currency: Currency?
+    
     init(
         networkClient: NetworkClient = NetworkClient(),
         localStorage: TransactionStorageProtocol,
-//        backupStorage: TransactionBackupStorageProtocol = TransactionBackupStorage()
+        bankAccountStorage: BankAccountStorageProtocol
     ) {
         self.networkClient = networkClient
         self.localStorage = localStorage
-//        self.backupStorage = backupStorage
-        Task {
-            do {
-                let account = try await networkClient.send(GetAccountRequest()).first
-                self.accountId = account?.id ?? 0
-                self.currency = account?.currency ?? .rub
-            } catch {
-                let account = try await BankAccountStorage().getAccount()
-                self.accountId = account.id
-                self.currency = account.currency
-                print("Не удалось загрузить аккаунт - \(error)")
-            }
-        }
+        self.bankAccountStorage = bankAccountStorage
     }
-    
-    private(set) var allTransactions: Set<Transaction> = []
-    private var accountId: Int = 0
-    var currency: Currency = .rub
     
     func getTransactions(from startDate: Date, to endDate: Date) async throws -> [Transaction] {
         do {
+            if accountId == nil || currency == nil {
+                do {
+                    let account = try await networkClient.send(GetAccountRequest()).first
+                    self.accountId = account?.id
+                    self.currency = account?.currency
+                } catch {
+                    print ("Не удалось загрузить аккаунт из сети")
+                    do {
+                        self.accountId = try await bankAccountStorage.getCurrentAccountId()
+                    } catch {
+                        throw error
+                    }
+                }
+            }
+            guard let accountId else {
+                print ("Не удалось загрузить аккаунт")
+                throw NetworkError.invalidURL
+            }
             let transactions = try await networkClient.send(GetTransactionRequest(accountId: accountId, startDate: startDate, endDate: endDate))
             return transactions
         }
@@ -47,6 +53,9 @@ final class TransactionsService {
     
     func createTransaction(categoryId: Int, amount: String, transactionDate: Date, comment: String?) async throws {
         do {
+            guard let accountId else {
+                throw NetworkError.invalidURL
+            }
             let response = try await networkClient.send(
                 CreateTransactionRequest(
                     categoryId: categoryId,
@@ -57,35 +66,34 @@ final class TransactionsService {
                 )
             )
             try await localStorage.create(response)
-        } catch {
-            // Если сервер вернул ошибку, создаём транзакцию локально с временным ID
-            let temporaryId = TemporaryIDGenerator.generateNextID()
-            let now = Date()
-            
-            // Находим существующие сущности в локальном хранилище
-            guard let accountEntity = try await localStorage.findAccountEntity(by: accountId),
-                  let categoryEntity = try await localStorage.findCategoryEntity(by: categoryId) else {
-                throw NSError(domain: "LocalStorage", code: 0, userInfo: [NSLocalizedDescriptionKey: "Не удалось найти аккаунт или категорию в локальном хранилище"])
+        } catch let error as NetworkError {
+            if case .noInternet = error  {
+                guard let accountId else {
+                    print("Нет доступного аккаунта для сохранения")
+                    throw error
+                }
+                return try await localStorage.create(
+                    Transaction(
+                        id: TemporaryIDGenerator.generateNextID(),
+                        account: BankAccount(id: accountId, name: "Основной счет", balance:  0, currency: .rub),
+                        category: Category(id: categoryId, name: "Заглушка для создания транзакции", emoji: "🤷‍♂", direction: .income),
+                        amount: amount.decimalFromLocalizedString() ?? 0,
+                        transactionDate: transactionDate,
+                        comment: comment,
+                        createdAt: Date(),
+                        updatedAt: Date()
+                    )
+                )
             }
-            
-            // Создаём временную транзакцию
-            let temporaryTransaction = Transaction(
-                id: temporaryId,
-                account: accountEntity.toModel(),
-                category: categoryEntity.toModel(),
-                amount: Decimal(string: amount) ?? 0,
-                transactionDate: transactionDate,
-                comment: comment,
-                createdAt: now,
-                updatedAt: now
-            )
-            
-            try await localStorage.create(temporaryTransaction)
+            throw error
         }
     }
     
     func editTransaction(transactionId: Int, categoryId: Int, amount: String, transactionDate: Date, comment: String?) async throws {
         do {
+            guard let accountId else {
+                throw NetworkError.invalidURL
+            }
             let response = try await networkClient.send(UpdateTransactionRequest(
                 transactionId: transactionId,
                 categoryId: categoryId,
@@ -96,27 +104,22 @@ final class TransactionsService {
             ))
             try await localStorage.update(response)
         } catch {
-            // Если сервер вернул ошибку, обновляем транзакцию локально
-            let now = Date()
-            // Находим существующие сущности в локальном хранилище
-            guard let accountEntity = try await localStorage.findAccountEntity(by: accountId),
-                  let categoryEntity = try await localStorage.findCategoryEntity(by: categoryId) else {
-                throw NSError(domain: "LocalStorage", code: 0, userInfo: [NSLocalizedDescriptionKey: "Не удалось найти аккаунт или категорию в локальном хранилище"])
+            guard let accountId else {
+                print("Нет доступного аккаунта для сохранения")
+                throw error
             }
-            
-            // Создаём обновлённую транзакцию
-            let updatedTransaction = Transaction(
-                id: transactionId,
-                account: accountEntity.toModel(),
-                category: categoryEntity.toModel(),
-                amount: Decimal(string: amount) ?? 0,
-                transactionDate: transactionDate,
-                comment: comment,
-                createdAt: now, // Используем текущее время как время создания
-                updatedAt: now
+            return try await localStorage.update(
+                Transaction(
+                    id: transactionId,
+                    account: BankAccount(id: accountId, name: "Основной счет", balance:  0, currency: .rub),
+                    category: Category(id: categoryId, name: "Заглушка для создания транзакции", emoji: "🤷‍♂", direction: .income),
+                    amount: amount.decimalFromLocalizedString() ?? 0,
+                    transactionDate: transactionDate,
+                    comment: comment,
+                    createdAt: Date(),
+                    updatedAt: Date()
+                )
             )
-            
-            try await localStorage.update(updatedTransaction)
         }
     }
     

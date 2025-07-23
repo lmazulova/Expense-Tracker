@@ -3,6 +3,7 @@ import SwiftUI
 struct AnalysisView: UIViewControllerRepresentable {
     let direction: Direction
     @Environment(\.presentationMode) var presentationMode
+    @Environment(DataProvider.self) private var dataProvider
         
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -17,7 +18,12 @@ struct AnalysisView: UIViewControllerRepresentable {
     }
     
     func makeUIViewController(context: Context) -> UIViewController {
-        let analysisVC = AnalysisViewController(direction: direction)
+        let analysisVC = AnalysisViewController(
+            direction: direction,
+            categoriesStorage: dataProvider.categoryStorage,
+            transactionsStorage: dataProvider.transactionStorage,
+            bankAccountStorage: dataProvider.bankAccountStorage
+        )
         
         let navController = UINavigationController(rootViewController: analysisVC)
         navController.navigationBar.tintColor = UIColor.violet
