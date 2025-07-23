@@ -10,12 +10,12 @@ import SwiftUI
 @MainActor
 @Observable
 final class BankAccountViewModel {
-    let bankAccountService: BankAccountService
+    var bankAccountService: BankAccountService?
     var state: LoadingState = .loading
     var isEditMode: Bool = false
     private(set) var account: BankAccount?
     
-    init(bankAccountService: BankAccountService) {
+    init(bankAccountService: BankAccountService? = nil) {
         self.bankAccountService = bankAccountService
     }
     
@@ -26,6 +26,11 @@ final class BankAccountViewModel {
     }
     
     func loadAccount() async {
+        guard let bankAccountService = bankAccountService else {
+            print("BankAccountService не инициализирован")
+            state = .error("Сервис банковского аккаунта не инициализирован")
+            return
+        }
         state = .loading
         do {
             let account = try await bankAccountService.currentAccount()
@@ -38,7 +43,12 @@ final class BankAccountViewModel {
     }
     
     func updateAccount(balance: Decimal, currency: Currency) async {
-        guard var account = account else { return }
+        guard var account,
+              let bankAccountService else {
+            print("BankAccountService не инициализирован")
+            state = .error("Сервис банковского аккаунта не инициализирован")
+            return
+        }
         account = BankAccount(id: account.id, name: account.name, balance: balance, currency: currency)
         do {
             let result = try await bankAccountService.updateAccount(account)

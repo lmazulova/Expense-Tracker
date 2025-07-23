@@ -4,7 +4,7 @@ import Foundation
 @MainActor
 @Observable
 final class CategoriesViewModel {
-    let categoriesService: CategoriesService
+    var categoriesService: CategoriesService?
     var state: LoadingState = .loading
     var allCategories: [Category] = [] {
         didSet { filterCategories() }
@@ -15,11 +15,16 @@ final class CategoriesViewModel {
     }
     private var debounceTask: Task<Void, Never>? = nil
     
-    init(categoriesService: CategoriesService) {
+    init(categoriesService: CategoriesService? = nil) {
         self.categoriesService = categoriesService
     }
     
     func loadCategories() async {
+        guard let categoriesService else {
+            print("CategoriesService не инициализирован")
+            state = .error("Упс, что-то пошло не так. Попробуйте позже.")
+            return
+        }
         state = .loading
         do {
             let categories = try await categoriesService.categories()

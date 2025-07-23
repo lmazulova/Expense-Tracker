@@ -22,8 +22,8 @@ struct TransactionCreationView: View {
     init(
         direction: Direction,
         selectedTransaction: Transaction? = nil,
-        transactionsService: TransactionsService,
-        categoriesService: CategoriesService
+        transactionsService: TransactionsService?,
+        categoriesService: CategoriesService?
     ) {
         self.direction = direction
         _viewModel = State(

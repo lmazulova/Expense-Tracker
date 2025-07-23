@@ -6,14 +6,11 @@ struct TransactionsListView: View {
     @State var viewModel: TransactionListViewModel
     @State private var showHistory: Bool = false
     @State var firstRequest: Bool = true
+    @Environment(DataProvider.self) private var dataProvider
     
     init(direction: Direction) {
         self._viewModel = State(
-            wrappedValue: TransactionListViewModel(
-                direction: direction,
-                transactionsService: TransactionsService(localStorage: TransactionStorage()),
-                categoriesService: CategoriesService(localStorage: CategoriesStorage())
-            )
+            wrappedValue: TransactionListViewModel(direction: direction)
         )
     }
     
@@ -66,13 +63,13 @@ struct TransactionsListView: View {
             }
         }
         .task {
-            //Костыль, т.к. возникает ошибка высокого уровня, при первой инициализации видимо
-            //не все свойства для составления запроса инициализируются вовремя, поэтому искусственно ждем 3 секунды
-            if firstRequest {
-                try? await Task.sleep(nanoseconds: 3_000_000_000)
+            if viewModel.transactionsService == nil {
+                viewModel.transactionsService = TransactionsService(localStorage: dataProvider.transactionStorage)
+            }
+            if viewModel.categoriesService == nil {
+                viewModel.categoriesService = CategoriesService(localStorage: dataProvider.categoryStorage)
             }
             await viewModel.loadTransactions()
-            firstRequest = false
         }
         .fullScreenCover(isPresented: $isModalPresented, onDismiss: {
             selectedTransaction = nil

@@ -3,11 +3,9 @@ import Foundation
 
 final class BankAccountStorage: BankAccountStorageProtocol {
     private let context: ModelContext
-    private let container: ModelContainer
     
-    init() {
-        self.container = try! ModelContainer(for: BankAccountModel.self)
-        self.context = ModelContext(container)
+    init(context: ModelContext) {
+        self.context = context
     }
     
     func getAccount() async throws -> BankAccount {

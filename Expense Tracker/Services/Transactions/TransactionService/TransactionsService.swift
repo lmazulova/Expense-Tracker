@@ -17,9 +17,9 @@ final class TransactionsService {
                 self.accountId = account?.id ?? 0
                 self.currency = account?.currency ?? .rub
             } catch {
-                let account = try await BankAccountStorage().getAccount()
-                self.accountId = account.id
-                self.currency = account.currency
+//                let account = try await BankAccountStorage().getAccount()
+//                self.accountId = account.id
+//                self.currency = account.currency
                 print("Не удалось загрузить аккаунт - \(error)")
             }
         }

@@ -10,6 +10,8 @@ class AnalysisViewController: UIViewController {
     private var sortingOrder: SortingOrder
     private var errorAlert: UIAlertController?
     private var loadingIndicator: UIActivityIndicatorView?
+    private let categoriesStorage: CategoriesStorage
+    private let transactionsStorage: TransactionStorage
     
     // MARK: - Lazy Views
 
@@ -77,12 +79,18 @@ class AnalysisViewController: UIViewController {
 
     // MARK: - Initializer
 
-    init(direction: Direction) {
+    init(
+        direction: Direction,
+        categoriesStorage: CategoriesStorage,
+        transactionsStorage: TransactionStorage
+    ) {
         self.direction = direction
+        self.categoriesStorage = categoriesStorage
+        self.transactionsStorage = transactionsStorage
         self.viewModel = AnalysisViewModel(
-            categoriesService: CategoriesService(localStorage: CategoriesStorage()),
+            categoriesService: CategoriesService(localStorage: categoriesStorage),
             direction: direction,
-            transactionService: TransactionsService(localStorage: TransactionStorage())
+            transactionService: TransactionsService(localStorage: transactionsStorage)
         )
         self.sortingOrder = viewModel.selectedOrder
         super.init(nibName: nil, bundle: nil)
@@ -148,7 +156,6 @@ class AnalysisViewController: UIViewController {
         
         view.addSubview(titleLabel)
         view.addSubview(tableView)
-        view.addSubview(pieChart)
         
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -338,6 +345,6 @@ extension AnalysisViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-#Preview {
-    AnalysisViewController(direction: .outcome)
-}
+//#Preview {
+//    AnalysisViewController(direction: .outcome)
+//}

@@ -21,14 +21,17 @@ final class TransactionCreationViewModel {
     var isEditMode: Bool = false
     var currency: Currency = .rub
     var state: LoadingState = .loading
+    private var transaction: Transaction?
+    private let transactionService: TransactionsService?
+    private let categoriesService: CategoriesService?
     
     var isChoseCategoryPresented: Bool = false
     
     init(
         direction: Direction,
         selectedTransaction: Transaction? = nil,
-        transactionService: TransactionsService,
-        categoriesService: CategoriesService
+        transactionService: TransactionsService?,
+        categoriesService: CategoriesService?
     ) {
         self.transactionService = transactionService
         self.categoriesService = categoriesService
@@ -47,32 +50,35 @@ final class TransactionCreationViewModel {
         }
     }
     
-    private var transaction: Transaction?
-    
-    private let transactionService: TransactionsService
-    private let categoriesService: CategoriesService
-    
     func editTransaction() async {
-            if let id = selectedTransaction?.id,
-               let categoryId = selectedCategory?.id {
-                state = .loading
-                do {
-                    try await transactionService.editTransaction(
-                        transactionId: id,
-                        categoryId: categoryId,
-                        amount: amountText,
-                        transactionDate: selectedTime,
-                        comment: comment.isEmpty ? "" : comment
-                    )
-                    state = .data
-                } catch {
-                    print("Ошибка изменения транзакции: - \(error)")
-                    state = .error(error.localizedDescription)
-                }
+        guard let transactionService else {
+            print("TransactionService не инициализирован")
+            return
+        }
+        if let id = selectedTransaction?.id,
+           let categoryId = selectedCategory?.id {
+            state = .loading
+            do {
+                try await transactionService.editTransaction(
+                    transactionId: id,
+                    categoryId: categoryId,
+                    amount: amountText,
+                    transactionDate: selectedTime,
+                    comment: comment.isEmpty ? "" : comment
+                )
+                state = .data
+            } catch {
+                print("Ошибка изменения транзакции: - \(error)")
+                state = .error(error.localizedDescription)
             }
+        }
     }
     
     func deleteTransaction() async {
+        guard let transactionService else {
+            print("TransactionService не инициализирован")
+            return
+        }
         if let id = selectedTransaction?.id {
             state = .loading
             do {
@@ -86,6 +92,10 @@ final class TransactionCreationViewModel {
     }
     
     func createTransaction() async {
+        guard let transactionService else {
+            print("TransactionService не инициализирован")
+            return
+        }
         if let categoryId = selectedCategory?.id {
             state = .loading
             do {
@@ -104,6 +114,10 @@ final class TransactionCreationViewModel {
     }
     
     func loadCategories() async {
+        guard let categoriesService else {
+            print("CategoriesService не инициализирован")
+            return
+        }
         state = .loading
         do {
             self.categories = try await categoriesService.categories(with: direction)

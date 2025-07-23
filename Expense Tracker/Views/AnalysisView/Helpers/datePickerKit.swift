@@ -86,6 +86,6 @@ final class CustomDatePickerView: UIView {
     }
 }
 
-#Preview {
-    AnalysisViewController(direction: .outcome)
-}
+//#Preview {
+//    AnalysisViewController(direction: .outcome)
+//}

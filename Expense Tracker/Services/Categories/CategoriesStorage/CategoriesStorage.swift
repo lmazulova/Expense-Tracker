@@ -4,11 +4,9 @@ import Foundation
 @MainActor
 final class CategoriesStorage: CategoriesStorageProtocol {
     private let context: ModelContext
-    private let container: ModelContainer
     
-    init() {
-        self.container = try! ModelContainer(for: CategoryModel.self)
-        self.context = ModelContext(container)
+    init(context: ModelContext) {
+        self.context = context
     }
     
     func getAllCategories() async throws -> [Category] {
@@ -26,10 +24,16 @@ final class CategoriesStorage: CategoriesStorageProtocol {
     }
     
     func save(_ categories: [Category]) async throws {
-        let descriptor = FetchDescriptor<CategoryModel>()
-        try context.fetch(descriptor).forEach { context.delete($0) }
-        categories.forEach { category in
-            context.insert(CategoryModel(from: category))
+        let existing = try context.fetch(FetchDescriptor<CategoryModel>())
+        let existingIds = Set(existing.map { $0.id })
+        
+        for category in categories {
+            guard !existingIds.contains(category.id) else {
+                continue
+            }
+            
+            let model = CategoryModel(from: category)
+            context.insert(model)
         }
         
         try context.save()

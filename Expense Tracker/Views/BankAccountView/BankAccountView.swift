@@ -8,14 +8,12 @@ struct BankAccountView: View {
     @State var editBalanceText: String = ""
     @State var editCurrency: Currency = .rub
     @FocusState private var textFieldIsFocused: Bool
+    @Environment(DataProvider.self) private var dataProvider
     
     init() {
-        self._viewModel = State(
-            wrappedValue: BankAccountViewModel(
-                bankAccountService: BankAccountService(localStorage: BankAccountStorage())
-            )
-        )
+        self._viewModel = State(wrappedValue: BankAccountViewModel())
     }
+    
     var body: some View {
         ScrollView {
             BalanceRow
@@ -52,6 +50,9 @@ struct BankAccountView: View {
             }
         }
         .task {
+            if viewModel.bankAccountService == nil {
+                viewModel.bankAccountService = BankAccountService(localStorage: dataProvider.bankAccountStorage)
+            }
             await viewModel.loadAccount()
             editBalanceText = viewModel.account?.balance.formattedWithLocale() ?? "0"
             editCurrency = viewModel.account?.currency ?? .rub

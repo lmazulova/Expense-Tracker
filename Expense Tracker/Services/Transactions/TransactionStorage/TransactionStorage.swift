@@ -4,12 +4,10 @@ import SwiftData
 
 @MainActor
 final class TransactionStorage: TransactionStorageProtocol {
-    private let container: ModelContainer
     private let context: ModelContext
     
-    init() {
-        self.container = try! ModelContainer(for: TransactionModel.self, BankAccountModel.self, CategoryModel.self)
-        self.context = ModelContext(container)
+    init(context: ModelContext) {
+        self.context = context
     }
     
     func getTransactions(from: Date, to: Date) async throws -> [Transaction] {
@@ -24,22 +22,36 @@ final class TransactionStorage: TransactionStorageProtocol {
     func create(_ transaction: Transaction) async throws {
         let account = findOrCreateAccount(from: transaction.account)
         let category = findOrCreateCategory(from: transaction.category)
-        
-        let transaction = TransactionModel(
-            id: transaction.id,
-            amount: transaction.amount,
-            transactionDate: transaction.transactionDate,
-            comment: transaction.comment,
-            createdAt: transaction.createdAt,
-            updatedAt: transaction.updatedAt,
-            account: account,
-            category: category
-        )
-        
-        context.insert(transaction)
+        let id = transaction.id
+        // Проверка: существует ли транзакция с таким id, на случай, когда при старте приложения мы подгружаем в хранилище все транзакции, иначе если это уже было проделано возникнет ошибка
+        if let existing = try context.fetch(
+            FetchDescriptor<TransactionModel>(predicate: #Predicate { $0.id == id })
+        ).first {
+            existing.amount = transaction.amount
+            existing.transactionDate = transaction.transactionDate
+            existing.comment = transaction.comment
+            existing.createdAt = transaction.createdAt
+            existing.updatedAt = transaction.updatedAt
+            existing.account = account
+            existing.category = category
+        } else {
+            // Создание новой сущности если транзакция не найдена
+            let newTransaction = TransactionModel(
+                id: transaction.id,
+                amount: transaction.amount,
+                transactionDate: transaction.transactionDate,
+                comment: transaction.comment,
+                createdAt: transaction.createdAt,
+                updatedAt: transaction.updatedAt,
+                account: account,
+                category: category
+            )
+            context.insert(newTransaction)
+        }
+
         try context.save()
     }
-
+    
     func update(_ transaction: Transaction) async throws {
         let id = transaction.id
         let fetch = FetchDescriptor<TransactionModel>(predicate: #Predicate { $0.id == id })
@@ -54,7 +66,7 @@ final class TransactionStorage: TransactionStorageProtocol {
             try context.save()
         }
     }
-
+    
     func delete(id: Int) async throws {
         let fetch = FetchDescriptor<TransactionModel>(predicate: #Predicate { $0.id == id })
         if let transaction = try context.fetch(fetch).first {

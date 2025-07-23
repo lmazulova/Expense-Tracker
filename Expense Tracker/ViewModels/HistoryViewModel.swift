@@ -28,7 +28,7 @@ final class HistoryViewModel {
     var showSortView: Bool = false
     private(set) var selectedOption: SortingOption = .none
     private(set) var selectedOrder: SortingOrder = .none
-    private var transactionService: TransactionsService
+    private var transactionService: TransactionsService?
     
     var sumOfTransactions: Decimal {
         transactions.reduce(0) { $0 + $1.amount }
@@ -38,7 +38,7 @@ final class HistoryViewModel {
         transactions.first?.account.currency ?? .rub
     }
     
-    init(transactionService: TransactionsService, direction: Direction) {
+    init(transactionService: TransactionsService?, direction: Direction) {
         let initialStartDate = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
         self.startDate = Calendar.current.startOfDay(for: initialStartDate)
         self.endDate = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date()
@@ -67,6 +67,11 @@ final class HistoryViewModel {
     }
     
     func loadTransactions() async {
+        guard let transactionService = transactionService else {
+            print("TransactionService не инициализирован")
+            state = .error("Сервис транзакций не инициализирован")
+            return
+        }
         state = .loading
         do {
             let transactions = try await transactionService.getTransactions(from: startDate, to: endDate)
