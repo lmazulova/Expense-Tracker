@@ -37,21 +37,26 @@ final class AnalysisViewModel {
         state = .loading
         do {
             await loadTransactions()
-            await categories = try categoriesService.categories(with: direction)
+            let fetchedCategories = try await categoriesService.categories(with: direction)
+            categories = fetchedCategories
             sortCategories()
             state = .data
+            DispatchQueue.main.async { [weak self] in
+                self?.onDataChanged?()
+            }
         } catch {
             print("Ошибка загрузки транзакций")
             state = .error(error.localizedDescription)
-        }
-        DispatchQueue.main.async { [weak self] in
-            self?.onDataChanged?()
+            DispatchQueue.main.async { [weak self] in
+                self?.onDataChanged?()
+            }
         }
     }
     private func loadTransactions() async {
         do {
-            filteredTransactions = try await transactionsService.getTransactions(from: startDate, to: endDate)
+            let filteredTransactions = try await transactionsService.getTransactions(from: startDate, to: endDate)
                 .filter{ $0.category.direction == direction }
+            self.filteredTransactions = filteredTransactions
         }
         catch {
             print(error.localizedDescription)

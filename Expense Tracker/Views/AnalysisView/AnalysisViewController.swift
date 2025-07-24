@@ -55,6 +55,7 @@ class AnalysisViewController: UIViewController {
         table.register(UITableViewCell.self, forCellReuseIdentifier: "endDateCell")
         table.register(UITableViewCell.self, forCellReuseIdentifier: "sortCell")
         table.register(UITableViewCell.self, forCellReuseIdentifier: "amountCell")
+        table.register(UITableViewCell.self, forCellReuseIdentifier: "pieChartCell")
         table.register(TransactionCell.self, forCellReuseIdentifier: TransactionCell.identifier)
         return table
     }()
@@ -71,7 +72,6 @@ class AnalysisViewController: UIViewController {
                 color6: .chartGrey
             )
         )
-        view.entities = [Entity(value: 20000, label: "На собачку"), Entity(value: 80000, label: "На отдых")]
         view.translatesAutoresizingMaskIntoConstraints = false
         
         return view
@@ -141,6 +141,11 @@ class AnalysisViewController: UIViewController {
         case .data:
             removeLoadingIndicator()
             tableView.reloadData()
+            var entities: [Entity] = []
+            for category in viewModel.sortedCategories {
+                entities.append(Entity(value: viewModel.sumOfCategory(with: category.id), label: category.name))
+            }
+            pieChart.entities = entities
         }
     }
     
@@ -226,7 +231,18 @@ class AnalysisViewController: UIViewController {
         cell.accessoryView = container
         cell.accessoryView?.frame.size = CGSize(width: 140, height: 34)
     }
-
+    
+    private func setupPieChart(_ cell: UITableViewCell) {
+        cell.contentView.addSubview(pieChart)
+        
+        NSLayoutConstraint.activate([
+            pieChart.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor),
+            pieChart.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
+            pieChart.heightAnchor.constraint(equalToConstant: 150),
+            pieChart.widthAnchor.constraint(equalToConstant: 150)
+        ])
+    }
+    
     private func setupAmount(_ cell: UITableViewCell) {
         cell.textLabel?.text = "Сумма"
         cell.textLabel?.font = .systemFont(ofSize: 17)
@@ -237,7 +253,7 @@ class AnalysisViewController: UIViewController {
         cell.contentView.addSubview(sumLabel)
         NSLayoutConstraint.activate([
             sumLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -16),
-            sumLabel.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
+            sumLabel.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
         ])
     }
     
@@ -281,13 +297,24 @@ class AnalysisViewController: UIViewController {
 // MARK: - UITableViewDataSource & UITableViewDelegate
 
 extension AnalysisViewController: UITableViewDataSource, UITableViewDelegate {
-    func numberOfSections(in tableView: UITableView) -> Int { 2 }
+    func numberOfSections(in tableView: UITableView) -> Int { 3 }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        section == 0 ? 4 : max(0, viewModel.sortedCategories.count)
+        switch section {
+        case 0:
+            4
+        case 1:
+            1
+        case 2:
+            max(0, viewModel.sortedCategories.count)
+        default:
+            0
+        }
     }
 
-    private func tableView(_ tableView: UITableView, heightForRowInSection section: Int) -> Int { 60 }
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return indexPath.section == 1 ? 165 : 60
+    }
 
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         view.tintColor = .systemGroupedBackground
@@ -323,6 +350,12 @@ extension AnalysisViewController: UITableViewDataSource, UITableViewDelegate {
             default:
                 return UITableViewCell()
             }
+        } else if indexPath.section == 1 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "pieChartCell", for: indexPath)
+            cell.backgroundColor = .clear
+            cell.selectionStyle = .none
+            setupPieChart(cell)
+            return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: TransactionCell.identifier, for: indexPath) as! TransactionCell
             let category = viewModel.sortedCategories[indexPath.row]
@@ -338,14 +371,15 @@ extension AnalysisViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        section == 1 ? "Операции" : nil
+        section == 2 ? "Операции" : nil
     }
 
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        section == 0 ? 0 : 40
+        section == 2 ? 23 : 0
     }
 }
 
 //#Preview {
 //    AnalysisViewController(direction: .outcome)
 //}
+
