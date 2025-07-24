@@ -150,9 +150,19 @@ final class TransactionsService {
     func deleteTransaction(byId id: Int) async throws {
         do {
             _ = try await networkClient.send(DeleteTransactionRequest(id: id))
-        } catch {
+            try await localStorage.delete(id: id)
+            await MainActor.run {
+                self.appMode?.isOffline = false
+            }
+        } catch let error as NetworkError {
             print("Не удалось удалить транзакцию с сервера: \(error)")
+            if case .noInternet = error {
+                await MainActor.run {
+                    self.appMode?.isOffline = true
+                }
+                return try await localStorage.delete(id: id)
+            }
+            throw error
         }
-        try await localStorage.delete(id: id)
     }
 }

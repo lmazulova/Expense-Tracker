@@ -19,6 +19,12 @@ struct BankAccountView: View {
         ScrollView {
             BalanceRow
             CurrencyRow
+            if viewModel.state == .data {
+                if !viewModel.isEditMode,
+                   let balances = viewModel.dailyBalance {
+                    BalanceChartView(balances: balances)
+                }
+            }
         }
         .padding(16)
         .frame(maxHeight: .infinity, alignment: .top)
@@ -55,7 +61,14 @@ struct BankAccountView: View {
                 viewModel.bankAccountService = BankAccountService(localStorage: dataProvider.bankAccountStorage)
                 viewModel.bankAccountService?.appMode = appMode
             }
+            if viewModel.transactionsService == nil {
+                viewModel.transactionsService = TransactionsService(
+                    localStorage: dataProvider.transactionStorage,
+                    bankAccountStorage: dataProvider.bankAccountStorage
+                )
+            }
             await viewModel.loadAccount()
+            await viewModel.loadDailyBalance()
             editBalanceText = viewModel.account?.balance.formattedWithLocale() ?? "0"
             editCurrency = viewModel.account?.currency ?? .rub
         }

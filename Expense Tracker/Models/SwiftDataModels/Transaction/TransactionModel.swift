@@ -10,7 +10,6 @@ final class TransactionModel {
     var createdAt: Date
     var updatedAt: Date
     
-    // Связи
     @Relationship var account: BankAccountModel
     @Relationship var category: CategoryModel
     

@@ -27,9 +27,10 @@ public final class PieChartView: UIView {
 
         let total = entities.map(\.value).reduce(0, +)
         guard total > 0 else { return }
-
-        let topEntities = Array(entities.sorted { $0.value > $1.value }.prefix(5))
-        let remaining = entities.dropFirst(5)
+        
+        let sortedEntities = Array(entities.sorted { $0.value > $1.value })
+        let topEntities = Array(sortedEntities.prefix(5))
+        let remaining = sortedEntities.dropFirst(5)
         let remainingValue = remaining.map(\.value).reduce(0, +)
         
         var displayItems = topEntities
@@ -38,8 +39,8 @@ public final class PieChartView: UIView {
         }
 
         let centerPoint = CGPoint(x: bounds.midX, y: bounds.midY)
-        let outerRadius = min(bounds.width, bounds.height) * 0.45
-        let innerRadius = outerRadius * 0.7
+        let outerRadius = min(bounds.width, bounds.height) * 0.5
+        let innerRadius = outerRadius * 0.9
         var startAngle: CGFloat = -.pi / 2
         
         for (index, entity) in displayItems.enumerated() {
@@ -63,32 +64,61 @@ public final class PieChartView: UIView {
     }
     
     private func drawLegend(in rect: CGRect, entities: [Entity]) {
+        let total = entities.map(\.value).reduce(0, +)
+        
+        let dotSize: CGFloat = 6
+        let spacing: CGFloat = 5
+        let interItemSpacing: CGFloat = 4
+        let textWidth: CGFloat = bounds.width * 0.6 - dotSize - spacing
+        let startX = bounds.midX - (bounds.width * 0.6) / 2
+
+        let font = UIFont.systemFont(ofSize: 7, weight: .regular)
         let paragraph = NSMutableParagraphStyle()
+        paragraph.lineBreakMode = .byWordWrapping
         paragraph.alignment = .left
 
-        let total = entities.map(\.value).reduce(0, +)
-
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 16, weight: .medium),
+            .font: font,
             .paragraphStyle: paragraph
         ]
 
-        var yOffset: CGFloat = bounds.midY - CGFloat(entities.count * 20)
+        var textHeights: [CGFloat] = []
+        for entity in entities {
+            let percent = Int(round((entity.value / total as NSDecimalNumber).doubleValue * 100))
+            let text = "\(percent)% \(entity.label)" as NSString
+            let bounding = text.boundingRect(
+                with: CGSize(width: textWidth, height: .greatestFiniteMagnitude),
+                options: [.usesLineFragmentOrigin, .usesFontLeading],
+                attributes: attributes,
+                context: nil
+            )
+            textHeights.append(ceil(bounding.height))
+        }
+
+        let totalHeight = textHeights.reduce(0, +) + CGFloat((entities.count - 1)) * interItemSpacing
+        var yOffset = bounds.midY - totalHeight / 2
 
         for (index, entity) in entities.enumerated() {
             let color = colors[index]
             let percent = Int(round((entity.value / total as NSDecimalNumber).doubleValue * 100))
-            let text = "\(percent)% \(entity.label)"
+            let text = "\(percent)% \(entity.label)" as NSString
+            let height = textHeights[index]
 
-            let dotRect = CGRect(x: bounds.midX - 40, y: yOffset + 4, width: 12, height: 12)
+            let dotY = yOffset + (height - dotSize) / 2
+            let dotRect = CGRect(x: startX, y: dotY, width: dotSize, height: dotSize)
             let dotPath = UIBezierPath(ovalIn: dotRect)
             color.setFill()
             dotPath.fill()
 
-            let textRect = CGRect(x: bounds.midX - 20, y: yOffset, width: bounds.width / 2, height: 20)
-            (text as NSString).draw(in: textRect, withAttributes: attributes)
+            let textRect = CGRect(
+                x: startX + dotSize + spacing,
+                y: yOffset,
+                width: textWidth,
+                height: height
+            )
+            text.draw(in: textRect, withAttributes: attributes)
 
-            yOffset += 24
+            yOffset += height + interItemSpacing
         }
     }
 }
