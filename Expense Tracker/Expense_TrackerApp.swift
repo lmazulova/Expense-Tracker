@@ -26,7 +26,7 @@ struct Expense_TrackerApp: App {
     
     var body: some Scene {
         WindowGroup {
-            AppTabView()
+            ContentView()
                 .environment(dataProvider)
                 .environment(\.modelContext, dataProvider.context)
                 .environment(appMode)

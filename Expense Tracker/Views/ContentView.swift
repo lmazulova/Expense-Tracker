@@ -1,8 +1,21 @@
-//
-//  ContentView.swift
-//  Expense Tracker
-//
-//  Created by user on 24.07.2025.
-//
+import SwiftUI
 
-import Foundation
+struct ContentView: View {
+    @State private var isAnimationCompleted = false
+
+    var body: some View {
+        Group {
+            if isAnimationCompleted {
+                AppTabView()
+            } else {
+                LottieView(animationName: "launchAnimation") {
+                    withAnimation {
+                        isAnimationCompleted = true
+                    }
+                }
+                .ignoresSafeArea()
+                .background(Color.white)
+            }
+        }
+    }
+}
